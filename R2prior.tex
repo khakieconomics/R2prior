@@ -189,14 +189,16 @@ $$f\left(\sigma_y\right) \propto \frac{1}{\sigma_y}
 This parameterization and prior makes it easy to work with any continuous
 outcome variable, no matter what its units of measurement are.
 
-We do not need a prior for $\sigma_{\epsilon}$ because our prior beliefs about
-$\sigma_{\epsilon} = \omega s_y \sqrt{1 - R^2}$ are already implied by our
-priors beliefs about $\omega$ and $R^2$. That only leaves a prior for
+We need not directly specify a prior for $\sigma_{\epsilon}$ because our prior
+beliefs about $\sigma_{\epsilon}$ are already implied by our beliefs about
+$\omega$ and $R^2$ via the relation
+$$\sigma_{\epsilon} = \omega s_y \sqrt{1 - R^2}.$$
+Thus, the only remaining distribution to specify is a prior for
 $\alpha =
 \overline{y} - \overline{\mathbf{x}}^\top \mathbf{R}^{-1} \boldsymbol{\theta}$.
-As a default, an improper uniform prior is possible (the posterior is still
-proper), but something like a Gaussian prior with mean zero and standard
-deviation $\sigma_y / \sqrt{N}$ can also work well.
+As a default, an improper uniform prior is possible as the posterior will still
+be proper, but we have also observed that a Gaussian prior with mean zero and
+standard deviation $\sigma_y / \sqrt{N}$ can also work well.
 
 
 
@@ -218,15 +220,15 @@ then be recovered as:
 When implementing this model, we actually utilize an improper uniform prior on
 $\log \omega$. Consequently, if $\log \omega = 0$, then the marginal standard
 deviation of the outcome \emph{implied by the model} is the same as the sample
-standard deviation of the outcome. If $\log \omega > 0$, then the marginal
-standard deviation of the outcome implied by the model exceeds the sample
-standard deviation, so the model overfits the data. If $\log \omega < 0$, then
-the marginal standard deviation of the outcome implied by the model is less than
-the sample standard deviation, so the model \emph{underfits} the data or that
-the data-generating process is nonlinear. Given the regularizing nature of the
-prior on $R^2$, a minor underfit would be considered ideal if the goal is to
-obtain good out-of-sample predictions. If the model badly underfits or overfits
-the data, then the model should be reconsidered.
+standard deviation of the outcome. Therefore, if $\log \omega > 0$, then the
+marginal standard deviation of the outcome implied by the model exceeds the
+sample standard deviation, which is to say that the model overfits the data. If
+$\log \omega < 0$, then the marginal standard deviation of the outcome implied
+by the model is less than the sample standard deviation and so the model
+underfits the data (or the data-generating process is nonlinear). Given the
+regularizing nature of the prior on $R^2$, a minor underfit would be considered
+ideal if the goal is to obtain good out-of-sample predictions. If the model
+badly underfits or overfits the data, then the model should be reconsidered.
 
 
 
@@ -236,8 +238,8 @@ Priors can be easy or hard for applied researchers to \emph{specify} and easy or
 hard for applied researchers to \emph{conceptualize}. Traditional shortcut
 priors on regression coefficients are often used because they are both easy to
 specify and to conceptualize. The informative prior on $R^2$ proposed in this
-paper is more difficult to conceptualize but with the recent release of the
-{\tt rstanarm} R package is equally easy to specify.
+paper is more difficult to conceptualize, but with the recent release of the
+{\tt rstanarm} R package it is equally easy to specify.
 
 
 \section*{References}
