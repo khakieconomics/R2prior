@@ -8,6 +8,8 @@
 \usepackage{graphicx}
 \graphicspath{{./fig/}}
 
+\usepackage{listings}
+
 \makeatother\renewcommand{\bibitem}{\vskip 2pt\par\hangindent\parindent\hskip-\parindent}
 
 \DeclareMathOperator{\E}{\mathbb{E}}
@@ -30,7 +32,7 @@ variable that is attributable to the predictors under a linear model. In
 particular, when there are many predictors relative to the number of
 observations we would expect the joint prior derived here to work better than
 placing independent, heavy-tailed priors on the coefficients, which is  standard
-practice in applied Bayesian data analysis but  neither reflects the beliefs of
+practice in applied Bayesian data analysis but neither reflects the beliefs of
 the researcher nor conveys enough information to stabilize all the computations.
 \end{abstract}
 
@@ -248,7 +250,7 @@ paper is more difficult to conceptualize, but with the recent release of the
 
 \bibitem Gabry, J., and Goodrich, B. (2016). rstanarm: Bayesian Applied
 Regression Modeling via Stan. R package version 2.9.0-3.
-\url{http://mc-stan.org/interfaces/rstanarm}
+\url{http://cran.r-project.org/package=rstanarm}
 
 \bibitem Guan, Y., and Stephens, M. (2011). Bayesian variable selection
 regression for genome-wide association studies, and other large-scale problems.
@@ -257,6 +259,106 @@ regression for genome-wide association studies, and other large-scale problems.
 \bibitem Lewandowski, D., Kurowicka D., and Joe, H. (2009). Generating random
 correlation matrices based on vines and extended onion method.
 \emph{Journal of Multivariate Analysis}. {\bf 100}(9): 1989--2001.
+
+\bibitem Hothorn, T., and Everitt, B. S. (2015).  HSAUR3: A Handbook of
+Statistical Analyses Using R (3rd Edition). R package version 1.0-5.
+\url{http://cran.r-project.org/package=HSAUR3}
+
+\bibitem Hothorn, T., and Everitt, B. S. (2014). \emph{A Handbook of
+Statistical Analyses Using R}. Chapman \& Hall/CRC, third edition.
+
+
+\appendix
+\clearpage
+\section{Example}
+
+\lstset{
+    language=R,
+    basicstyle=\footnotesize\ttfamily,
+    literate={~} {$\sim$}{1}
+    }
+
+We will utilize an example from the {\tt HSAUR3} R package, which is used in the
+2014 third edition of \emph{A Handbook of Statistical Analyses Using R}.
+The model in section 5.3.1 analyzes an experiment where clouds were seeded
+with different amounts of silver iodide to see if there was increased rainfall.
+This effect could vary according to covariates, which (except for time) are
+interacted with the treatment variable. Most people would probably be skeptical
+that cloud hacking could explain very much of the variation in rainfall and
+thus the prior mode of the $R^2$ would probably be fairly small.
+
+The frequentist estimator of this model can be replicated in R by executing
+
+\begin{lstlisting}
+> data("clouds", package = "HSAUR3")
+> mod <- rainfall ~ seeding * (sne + cloudcover + prewetness + echomotion) + time
+> ols <- lm(mod, data = clouds)
+\end{lstlisting}
+
+from which we obtain the estimated coefficients
+
+\begin{lstlisting}
+> round(coef(ols), digits = 3)
+          (Intercept)                      seedingyes
+           -0.346                           15.683
+          sne                              cloudcover
+           0.420                            0.388
+          prewetness                       echomotionstationary
+           4.108                            3.153
+          time                             seedingyes:sne
+           -0.045                           -3.197
+          seedingyes:cloudcover            seedingyes:prewetness
+           -0.486                           -2.557
+          seedingyes:echomotionstationary
+           -0.562
+\end{lstlisting}
+
+Note that we have \emph{not} looked at the estimated $R^2$ or $\sigma$ for the
+ordinary least squares model. We can estimate a Bayesian version of this model
+using the {\tt rstanarm} package by prepending {\tt stan\_} to the {\tt lm}
+call and specifying a prior mode for $R^2$ using the {\tt R2} function:
+
+\begin{lstlisting}
+> library("rstanarm")
+> post <- stan_lm(mod, data = clouds, prior = R2(location = 0.2, what = "mode"))
+\end{lstlisting}
+
+The posterior medians for the coefficients are
+
+\begin{lstlisting}
+> round(coef(post), digits = 3)
+          (Intercept)                      seedingyes
+           2.303                            6.753
+          sne                              cloudcover
+           0.193                            0.162
+          prewetness                       echomotionstationary
+           1.751                            1.345
+          time                             seedingyes:sne
+           -0.019                           -1.407
+          seedingyes:cloudcover            seedingyes:prewetness
+           -0.204                           -1.068
+          seedingyes:echomotionstationary
+           -0.264
+\end{lstlisting}
+
+
+The point estimates from the Bayesian model, which are represented by the
+posterior medians, appear quite different from the ordinary least squares
+estimates. However, the {\tt log-fit\_ratio} (i.e. $\log{\omega}$) is
+quite small
+
+\begin{lstlisting}
+> summary(post)["log-fit_ratio", "50%"]
+          -0.010
+\end{lstlisting}
+
+which indicates that the model only slightly overfits the data when the prior
+derived above is utilized. Thus, it would be safe to conclude that the ordinary
+least squares estimator considerably overfits the data since there are only $24$
+observations with which to estimate $12$ parameters and no prior information is
+leveraged. In general, we would expect the prior derived in this paper to be
+well-suited in situations like the one above, where there are many predictors
+relative to the number of observations.
 
 
 
