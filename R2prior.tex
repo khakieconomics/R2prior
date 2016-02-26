@@ -8,17 +8,41 @@
 \usepackage{graphicx}
 \graphicspath{{./fig/}}
 
+% For R code snippets
 \usepackage{listings}
 
+% Bibliography spacing/indentation
 \makeatother\renewcommand{\bibitem}{\vskip 2pt\par\hangindent\parindent\hskip-\parindent}
 
-\DeclareMathOperator{\E}{\mathbb{E}}
+% Define a bunch of custom math shortcuts for expressions used many times
+% throughout the paper
+\newcommand{\Rsq}{$R^2\,$}
+\newcommand{\boldrho}{\boldsymbol{\rho}}
+\newcommand{\boldbeta}{\boldsymbol{\beta}}
+\newcommand{\boldtheta}{\boldsymbol{\theta}}
+\newcommand{\hatbeta}{\widehat{\boldbeta}}
+\newcommand{\hatalpha}{\widehat{\alpha}}
+\newcommand{\sigmaEps}{\sigma_{\epsilon}}
+\newcommand{\X}{\mathbf{X}}
+\newcommand{\y}{\mathbf{y}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\locRsq}{\ell_{R^2}}
+\newcommand{\halfK}{\frac{K}{2}}
+\newcommand{\Betadist}[2]{\mathrm{Beta}\left(#1,#2\right)}
+\newcommand{\Digamma}[1]{\psi\left(#1\right)}
+
 
 % Title, authors, date
-\title{\bf Regularizing Bayesian linear models with an informative prior on $R^2$\vspace{.1in}}
-\author{Ben Goodrich\footnote{Columbia University} \and Jonah Gabry$^{\ast}$
-\and Andrew Gelman$^{\ast}$ \and Matthew Stephens\footnote{University of Chicago}\vspace{.1in}}
-\date{25 February 2016\vspace{-.2in}}
+\title{\bf Regularizing Bayesian linear models with an informative prior on \Rsq
+    \vspace{.1in}}
+\author{Ben Goodrich\footnote{Columbia University}
+    \and Jonah Gabry$^{\ast}$
+    \and Andrew Gelman$^{\ast}$
+    \and Matthew Stephens\footnote{University of Chicago}
+    \vspace{.1in}}
+\date{25 February 2016
+    \vspace{-.2in}}
 
 % Begin document
 \begin{document}
@@ -27,7 +51,7 @@
 
 \begin{abstract}
 \noindent In this paper we derive an approach for expressing prior beliefs about
-the location of the $R^2$, the familiar proportion of variance in the outcome
+the location of the \Rsq, the familiar proportion of variance in the outcome
 variable that is attributable to the predictors under a linear model. In
 particular, when there are many predictors relative to the number of
 observations we would expect the joint prior derived here to work better than
@@ -35,6 +59,7 @@ placing independent, heavy-tailed priors on the coefficients, which is  standard
 practice in applied Bayesian data analysis but neither reflects the beliefs of
 the researcher nor conveys enough information to stabilize all the computations.
 \end{abstract}
+
 
 \section{Introduction}
 
@@ -49,14 +74,14 @@ taken to apply to all the regression coefficients as if they were independent of
 each other (and the intercept and error variance).
 
 In this paper we derive and demonstrate an approach for expressing  prior
-beliefs about the location of the $R^2$, the familiar proportion of variance in
+beliefs about the location of the \Rsq, the familiar proportion of variance in
 the outcome variable that is attributable to the predictors under a linear
-model. Since the $R^2$ is a well-understood bounded scalar, it is easy to
-specify prior information about it. In particular, when there are many
-predictors relative to the number of observations we would expect the joint
-prior derived here to work better than placing independent, heavy-tailed priors
-on the coefficients, which neither reflects the beliefs of the researcher nor
-conveys enough information to stabilize all the computations.
+model. Since the \Rsq is a well-understood bounded scalar, it is easy to specify
+prior information about it. In particular, when there are many predictors
+relative to the number of observations we would expect the joint prior derived
+here to work better than placing independent, heavy-tailed priors on the
+coefficients, which neither reflects the beliefs of the researcher nor conveys
+enough information to stabilize all the computations.
 
 
 \section{Likelihood}
@@ -65,44 +90,34 @@ The likelihood for one observation $y_i$ under a linear model can be written as
 the conditionally normal density
 
 $$
-f(y_i \,|\, \mu_i, \sigma_\epsilon)
-= \frac{1}{\sigma_{\epsilon} \sqrt{2 \pi}}
-\exp{\left\{-\frac{1}{2} \left(\frac{y_i - \mu_i}{\sigma_{\epsilon}}\right)^2\right\}},
+f \left(y_i \,|\, \mu_i, \sigmaEps \right) = \frac{1}{\sigmaEps \sqrt{2 \pi}}
+\exp{\left\{-\frac{1}{2} \left(\frac{y_i - \mu_i}{\sigmaEps}\right)^2\right\}},
 $$
 %
-where $\mu_i = \alpha + \mathbf{x}_i^\top \boldsymbol{\beta}$ is a linear
-predictor and $\sigma_{\epsilon}$ is the standard deviation of the error in
-predicting the outcome. The likelihood of the entire sample is the product of
-$N$ individual likelihood contributions and it is well-known that the likelihood
-is maximized when the sum-of-squared residuals is minimized. This occurs when
+where $\mu_i = \alpha + \mathbf{x}_i^\top \boldbeta$ is a linear
+predictor and $\sigmaEps$ is the standard deviation of the error in predicting
+the outcome. The likelihood of the entire sample is the product of $N$
+individual likelihood contributions and it is well known that the likelihood is
+maximized when the sum-of-squared residuals is minimized. This occurs when
 
 \begin{align*}
-\widehat{\boldsymbol{\beta}}
-  &= \left(\mathbf{X}^\top \mathbf{X}\right)^{-1} \mathbf{X}^\top \mathbf{y},\\
-\widehat{\alpha}
-  &= \overline{y} - \overline{\mathbf{x}}^\top \widehat{\boldsymbol{\beta}},\\
-\widehat{\sigma}_{\epsilon}^2
-  &= \frac{\left(\mathbf{y} - \widehat{\alpha} -
-        \mathbf{X} \widehat{\boldsymbol{\beta}}\right)^\top
-        \left(\mathbf{y} - \widehat{\alpha} -
-        \mathbf{X} \widehat{\boldsymbol{\beta}}\right)}{N},
+\hatbeta &= \left(\X^\top \X \right)^{-1} \X^\top \y,\\
+\hatalpha &= \overline{y} - \overline{\mathbf{x}}^\top \hatbeta,\\
+\widehat{\sigma}_{\epsilon}^2 &=
+  \frac{1}{N}
+  \left(\y - \hatalpha - \X \hatbeta \right)^\top
+  \left(\y - \hatalpha - \X \hatbeta \right),
 \end{align*}
 %
 where $\overline{\mathbf{x}}$ is a vector that contains the sample means of the
-$K$ predictors, $\mathbf{X}$ is a $N \times K$ matrix of \emph{centered}
-predictors, $\mathbf{y}$ is a $N$-vector of outcomes, and $\overline{y}$ is the
-sample mean of the outcome.
+$K$ predictors, $\X$ is a $N \times K$ matrix of \emph{centered} predictors,
+$\y$ is a $N$-vector of outcomes, and $\overline{y}$ is the sample mean of the
+outcome.
 
-Taking a QR decomposition of the design matrix,
-$\mathbf{X} = \mathbf{Q}\mathbf{R}$,
-where $\mathbf{Q}^\top \mathbf{Q} = \mathbf{I}$ and $\mathbf{R}$ is upper
-triangular, we can write the OLS solution for the coefficients as
-
-$$
-\widehat{\boldsymbol{\beta}}
-= \left(\mathbf{X}^\top \mathbf{X}\right)^{-1} \mathbf{X}^\top \mathbf{y}
-= \mathbf{R}^{-1} \mathbf{Q}^\top \mathbf{y}.
-$$
+Taking a QR decomposition of the design matrix, $\X = \Q\R$, where
+$\Q^\top \Q = \mathbf{I}$ and $\R$ is upper triangular, we can write the OLS
+solution for the coefficients as
+$$\hatbeta = \left(\X^\top \X \right)^{-1} \X^\top \y = \R^{-1} \Q^\top \y.$$
 %
 The QR decomposition is often used for numeric stability reasons (see the
 familiar {\tt lm} function in R), but, as we outline below, it is also useful
@@ -111,79 +126,72 @@ for thinking about priors in a Bayesian version of the linear model.
 \section{Priors}
 
 The key innovation in this paper is the prior for the parameters in the
-QR-reparameterized model. To understand this prior, think about the equations
+QR-reparameterized model. To understand this prior, we start with the equations
 that characterize the maximum likelihood solutions before observing the data on
-$\mathbf{X}$ and especially $\mathbf{y}$.
+$\X$ and especially $\y$.
 
-What would the prior distribution of
-$\boldsymbol{\theta} = \mathbf{Q}^\top \mathbf{y}$ be?
-We can write its $k$-th element as
-$$\theta_k = \rho_k \sigma_Y \sqrt{N - 1},$$
-where $\rho_k$ is the correlation between the $k$th column of $\mathbf{Q}$ and
-the outcome, $\sigma_Y$ is the standard deviation of the outcome, and
-$1/\sqrt{N-1}$ is the standard deviation of the $k$ column of $\mathbf{Q}$.
-Then let $\boldsymbol{\rho} = \sqrt{R^2}\mathbf{u}$ where $\mathbf{u}$ is a unit
-vector that is uniformally distributed on the surface of a hypersphere.
-Consequently, $R^2 = \boldsymbol{\rho}^\top \boldsymbol{\rho}$ is the familiar
-coefficient of determination for the linear model.
+What would the prior distribution of $\boldtheta = \Q^\top \y$ be? We can write
+its $k$-th element as
+$$\theta_k = \rho_k \sigma_y \sqrt{N - 1},$$
+where $\rho_k$ is the correlation between the $k$th column of $\Q$ and the
+outcome, $\sigma_y$ is the marginal standard deviation of the outcome, and
+$1/\sqrt{N-1}$ is the standard deviation of the $k$ column of $\Q$. Then let
+$\boldrho = \sqrt{R^2}\mathbf{u}$, where $\mathbf{u}$ is a unit vector that is
+uniformally distributed on the surface of a hypersphere. Consequently,
+$R^2 = \boldrho^\top \boldrho$ is the familiar coefficient of determination for
+the linear model.
 
-An uninformative prior on $R^2$ would be standard uniform, which is a special
-case of a $\mathrm{Beta}(a, b)$ distribution with both shape parameters $a$ and
-$b$ equal to $1$. A non-uniform prior on $R^2$ is somewhat analogous to ridge
+An uninformative prior on \Rsq would be standard uniform, which is a special
+case of a $\Betadist{a}{b}$ distribution with both shape parameters $a$ and
+$b$ equal to $1$. A non-uniform prior on \Rsq is somewhat analogous to ridge
 regression, which is popular in data mining and produces better out-of-sample
-predictions than least squares because it penalizes
-$\boldsymbol{\beta}^\top \boldsymbol{\beta}$,
-usually after standardizing the predictors. In our case, an
-informative prior on $R^2$ effectively penalizes
-$\boldsymbol{\rho}\top \boldsymbol{\rho}$,
-which encourages $\boldsymbol{\beta} = \mathbf{R}^{-1} \boldsymbol{\theta}$
-to be closer to the origin.
+predictions than least squares because it penalizes $\boldbeta^\top \boldbeta$,
+usually after standardizing the predictors. In our case, an informative prior on
+\Rsq effectively penalizes $\boldrho^\top \boldrho$, which encourages
+$\boldbeta = \R^{-1} \boldtheta$ to be closer to the origin.
 
 Lewandowski, Kurowicka, and Joe (2009) derives a distribution for a correlation
 matrix that depends on a single shape parameter $\eta > 0$, which implies the
 variance of one variable given the remaining $K$ variables is
-$\mathrm{Beta}\left(\eta,\frac{K}{2}\right)$. Thus, the $R^2$ is distributed
-$\mathrm{Beta}\left(\frac{K}{2},\eta\right)$ and any prior information about the
-location of $R^2$, which we will denote $\ell_{R^2}$, can be used to choose a
-value of the hyperparameter $\eta$.
+$\Betadist{\eta}{\halfK}$. Thus, the \Rsq is distributed
+$\Betadist{\halfK}{\eta}$ and any prior information about the location of
+\Rsq, which we will denote $\locRsq$, can be used to choose a value of the
+hyperparameter $\eta$.
 
-Four ways of choosing $\eta$ via the specification of $\ell_{R^2}$ are:
+Four ways of implying a value for $\eta$ via the specification of $\locRsq$ are:
 
 \begin{enumerate}
-\item $\ell_{R^2}$ is the prior mode on the $\left(0,1\right)$ interval.
+\item $\locRsq$ is the prior mode on the $\left(0,1\right)$ interval.
 
-This is only valid if $K \geq 2$ since the mode of a
-$\mathrm{Beta}\left(\frac{K}{2},\eta\right)$ distribution is \newline
-$\left(\frac{K}{2} - 1\right) / \left(\frac{K}{2} + \eta - 2\right)$
+This is only valid if $K \geq 2$ since the mode of a $\Betadist{\halfK}{\eta}$
+distribution is \newline
+$\left(\halfK - 1\right) / \left(\halfK + \eta - 2\right)$
 and does not exist if $K < 2$.
 
-\item $\ell_{R^2}$ is the prior mean on the $\left(0,1\right)$ interval, where
-the mean of a $\mathrm{Beta}\left(\frac{K}{2}, \eta\right)$ distribution is
-$\left(\frac{K}{2}\right) / \left(\frac{K}{2} + \eta\right)$.
+\item $\locRsq$ is the prior mean on the $\left(0,1\right)$ interval, where
+the mean of a $Betadist{\halfK}{\eta}$ distribution is
+$\left(\halfK\right) / \left(\halfK + \eta\right)$.
 
+\item $\locRsq$ is the prior median on the $\left(0,1\right)$ interval.
 
-\item $\ell_{R^2}$ is the prior median on the $\left(0,1\right)$ interval.
-
-The median of a $\mathrm{Beta}\left(\frac{K}{2},\eta\right)$ distribution is not
-available in closed form, but if $K > 2$ it is approximately equal to
-$\left(\frac{K}{2} - \frac{1}{3}\right) / \left(\frac{K}{2} +
-\eta - \frac{2}{3}\right)$.
+The median of a $\Betadist{\halfK}{\eta}$ distribution is not available in
+closed form, but if $K > 2$ the median is approximately equal to
+$\left(\halfK - \frac{1}{3}\right) / \left(\halfK + \eta - \frac{2}{3}\right)$.
 Regardless of whether $K > 2$, we can numerically solve for the value of $\eta$
-that is consistent with a given prior median utilizing.
+that is consistent with a given prior median.
 
-\item $\ell_{R^2}$ is some (negative) prior value for
-$\E\left(\log R^2\right) = \psi\left(\frac{K}{2}\right) -
-\psi\left(\frac{K}{2}+\eta\right)$,
-where $\psi\left(\cdot\right)$ is the Digamma function. Again, given a prior
-value for the left-hand side it is easy to numerically solve for the
-corresponding value of $\eta$.
+\item $\locRsq$ is some (negative) prior value for
+$E\left(\log{R^2}\right) = \Digamma{\halfK} - \Digamma{\halfK + \eta}$,
+where $\Digamma{\cdot}$ is the Digamma function. Again, given a prior value for
+the left-hand side it is easy to numerically solve for the corresponding value
+of $\eta$.
 \end{enumerate}
 
 
 For $\sigma_y$ we set $\sigma_y = \omega s_y$ where $s_y$ is the sample standard
 deviation of the outcome and $\omega > 0$ is an unknown scale parameter to be
 estimated. The only prior for $\omega$ that does not contravene Bayes' theorem
-in this situation is Jeffreys prior,
+in this situation is the Jeffreys prior,
 $$f\left(\omega\right) \propto \frac{1}{\omega},$$
 which is proportional to a Jeffreys prior on the unknown $\sigma_y$,
 $$f\left(\sigma_y\right) \propto \frac{1}{\sigma_y}
@@ -191,44 +199,40 @@ $$f\left(\sigma_y\right) \propto \frac{1}{\sigma_y}
 This parameterization and prior makes it easy to work with any continuous
 outcome variable, no matter what its units of measurement are.
 
-We need not directly specify a prior for $\sigma_{\epsilon}$ because our prior
-beliefs about $\sigma_{\epsilon}$ are already implied by our beliefs about
-$\omega$ and $R^2$ via the relation
-$$\sigma_{\epsilon} = \omega s_y \sqrt{1 - R^2}.$$
+We need not directly specify a prior for $\sigmaEps$ because our prior beliefs
+about $\sigmaEps$ are already implied by our beliefs about $\omega$ and \Rsq via
+the relation
+$$\sigmaEps = \omega s_y \sqrt{1 - R^2}.$$
 Thus, the only remaining distribution to specify is a prior for
-$\alpha =
-\overline{y} - \overline{\mathbf{x}}^\top \mathbf{R}^{-1} \boldsymbol{\theta}$.
+$\alpha = \overline{y} - \overline{\mathbf{x}}^\top \R^{-1} \boldtheta$.
 As a default, an improper uniform prior is possible as the posterior will still
 be proper, but we have also observed that a Gaussian prior with mean zero and
-standard deviation $\sigma_y / \sqrt{N}$ can also work well.
+standard deviation $\sigma_y / \sqrt{N}$ can work well in many cases.
 
 
 
 \section{Posterior}
 
 The previous sections imply a posterior distribution for $\omega$, $\alpha$,
-$\mathbf{u}$, and $R^2$. After fitting the model, the parameters of interest can
-then be recovered as:
+$\mathbf{u}$, and \Rsq. After fitting the model, we can recover the parameters
+of interest from the primitive parameters as:
 %
 \begin{align*}
-\sigma_y
-  &= \omega s_y \\
-\sigma_{\epsilon}
-  &= \sigma_y \sqrt{1 - R^2} \\
-\boldsymbol{\beta}
-  &= \mathbf{R}^{-1} \mathbf{u} \sigma_y \sqrt{R^2 \left(N-1\right)}
+\sigma_y &= \omega s_y \\
+\sigmaEps &= \sigma_y \sqrt{1 - R^2} \\
+\boldbeta &= \R^{-1} \mathbf{u} \sigma_y \sqrt{R^2 \left(N-1\right)}
 \end{align*}
 
 When implementing this model, we actually utilize an improper uniform prior on
-$\log \omega$. Consequently, if $\log \omega = 0$, then the marginal standard
+$\log{\omega}$. Consequently, if $\log{\omega} = 0$, then the marginal standard
 deviation of the outcome \emph{implied by the model} is the same as the sample
-standard deviation of the outcome. Therefore, if $\log \omega > 0$, then the
+standard deviation of the outcome. Therefore, if $\log{\omega} > 0$, then the
 marginal standard deviation of the outcome implied by the model exceeds the
 sample standard deviation, which is to say that the model overfits the data. If
-$\log \omega < 0$, then the marginal standard deviation of the outcome implied
+$\log{\omega} < 0$, then the marginal standard deviation of the outcome implied
 by the model is less than the sample standard deviation and so the model
 underfits the data (or the data-generating process is nonlinear). Given the
-regularizing nature of the prior on $R^2$, a minor underfit would be considered
+regularizing nature of the prior on \Rsq, a minor underfit would be considered
 ideal if the goal is to obtain good out-of-sample predictions. If the model
 badly underfits or overfits the data, then the model should be reconsidered.
 
@@ -239,7 +243,7 @@ badly underfits or overfits the data, then the model should be reconsidered.
 Priors can be easy or hard for applied researchers to \emph{specify} and easy or
 hard for applied researchers to \emph{conceptualize}. Traditional shortcut
 priors on regression coefficients are often used because they are both easy to
-specify and to conceptualize. The informative prior on $R^2$ proposed in this
+specify and to conceptualize. The informative prior on \Rsq proposed in this
 paper is more difficult to conceptualize, but with the recent release of the
 {\tt rstanarm} R package it is equally easy to specify.
 
@@ -285,7 +289,7 @@ with different amounts of silver iodide to see if there was increased rainfall.
 This effect could vary according to covariates, which (except for time) are
 interacted with the treatment variable. Most people would probably be skeptical
 that cloud hacking could explain very much of the variation in rainfall and
-thus the prior mode of the $R^2$ would probably be fairly small.
+thus the prior mode of the \Rsq would probably be fairly small.
 
 The frequentist estimator of this model can be replicated in R by executing
 
@@ -313,10 +317,10 @@ from which we obtain the estimated coefficients
            -0.562
 \end{lstlisting}
 
-Note that we have \emph{not} looked at the estimated $R^2$ or $\sigma$ for the
+Note that we have \emph{not} looked at the estimated \Rsq or $\sigma$ for the
 ordinary least squares model. We can estimate a Bayesian version of this model
 using the {\tt rstanarm} package by prepending {\tt stan\_} to the {\tt lm}
-call and specifying a prior mode for $R^2$ using the {\tt R2} function:
+call and specifying a prior mode for \Rsq using the {\tt R2} function:
 
 \begin{lstlisting}
 > library("rstanarm")
