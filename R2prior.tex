@@ -128,9 +128,10 @@ for thinking about priors in a Bayesian version of the linear model.
 \section{Priors}
 
 The key innovation in this paper is the prior for the parameters in the
-QR-reparameterized model. To understand this prior, we start with the equations
-that characterize the maximum likelihood solutions before observing the data on
-$\X$ and especially $\y$.
+QR-reparameterized model, which can be thought of as a prior on the correlations
+between the outcome $\y$ and the columns of $\Q$. To understand this prior, we
+start with the equations that characterize the maximum likelihood solutions
+\emph{before} observing the data $\left(\y, \X\right)$.
 
 Let $\boldtheta = \Q^\top \y$. We can write the $k$-th element of the vector
 $\boldtheta$ as
@@ -140,7 +141,8 @@ outcome, $\sigma_y$ is the marginal standard deviation of the outcome, and
 $1/\sqrt{N-1}$ is the standard deviation of the $k$ column of $\Q$. Then let
 $\boldrho = \sqrt{R^2}\mathbf{u}$, where $\mathbf{u}$ is a unit vector that is
 uniformally distributed on the surface of a hypersphere. Consequently,
-$R^2 = \boldrho^\top \boldrho$ is the familiar coefficient of determination for
+$\mathbf{u}^\top \mathbf{u} = 1$ implies that the sum of squared correlations is
+$\boldrho^\top \boldrho = R^2$, the familiar coefficient of determination for
 the linear model.
 
 An uninformative prior on \Rsq would be standard uniform, which is a special
@@ -189,7 +191,9 @@ where $\Digamma{\cdot}$ is the Digamma function. Again, given a prior value for
 the left-hand side it is easy to numerically solve for the corresponding value
 of $\eta$.
 \end{enumerate}
-
+%
+Each of these specifications of $\locRsq$ implies a value of $\eta$,
+which is the single hyperparameter of the joint prior on the coefficients.
 
 For $\sigma_y$ we set $\sigma_y = \omega s_y$ where $s_y$ is the sample standard
 deviation of the outcome and $\omega > 0$ is an unknown scale parameter to be
@@ -209,8 +213,7 @@ $$\sigmaEps = \omega s_y \sqrt{1 - R^2}.$$
 Thus, the only remaining distribution to specify is a prior for
 $\alpha = \overline{y} - \overline{\mathbf{x}}^\top \R^{-1} \boldtheta$.
 As a default, an improper uniform prior is possible as the posterior will still
-be proper, but we have also observed that a Gaussian prior with mean zero and
-standard deviation $\sigma_y / \sqrt{N}$ can work well in many cases.
+be proper.
 
 
 \section{Posterior}
@@ -237,7 +240,6 @@ underfits the data (or the data-generating process is nonlinear). Given the
 regularizing nature of the prior on \Rsq, a minor underfit would be considered
 ideal if the goal is to obtain good out-of-sample predictions. If the model
 badly underfits or overfits the data, then the model should be reconsidered.
-
 
 
 \section{Conclusion}
