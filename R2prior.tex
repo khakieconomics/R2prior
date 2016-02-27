@@ -155,12 +155,14 @@ usually after standardizing the predictors. In our case, an informative prior on
 regression coefficients $\boldbeta = \R^{-1} \boldtheta$ to be closer to the
 origin.
 
-Lewandowski, Kurowicka, and Joe (2009) derives a distribution for a correlation
-matrix that depends on a single shape parameter $\eta > 0$, which implies the
-variance of one variable given the remaining $K$ variables is
-$\Betadist{\eta}{\halfK}$. Thus, the \Rsq is distributed
-$\Betadist{\halfK}{\eta}$ and any prior information about the location of
-\Rsq, which we will denote $\locRsq$, can be used to choose a value of the
+Next, consider a correlation matrix among both the outcome and the predictors of
+our reparameterized model. Lewandowski, Kurowicka, and Joe (2009) derives a
+distribution for a correlation matrix that depends on a single shape parameter
+$\eta > 0$ and implies that the conditional variance of one variable given the
+remaining $K$ variables is distributed $\Betadist{\eta}{\halfK}$. From the
+reflection symmetry of the Beta distribution, \Rsq is therefore distributed
+$\Betadist{\halfK}{\eta}$ and any prior information about the location of \Rsq,
+which we will denote $\locRsq$, can be used to choose a value of the
 hyperparameter $\eta$.
 
 Four ways of implying a value for $\eta$ via the specification of $\locRsq$ are:
