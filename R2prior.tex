@@ -86,8 +86,8 @@ enough information to stabilize all the computations.
 
 \section{Likelihood}
 
-The likelihood for one observation $y_i$ under a linear model can be written as
-the conditionally normal density
+The likelihood contribution for one observation $y_i$ under a linear model
+can be written as the conditionally normal density
 
 $$
 f \left(y_i \,|\, \mu_i, \sigmaEps \right) = \frac{1}{\sigmaEps \sqrt{2 \pi}}
@@ -96,10 +96,11 @@ $$
 %
 where $\mu_i = \alpha + \mathbf{x}_i^\top \boldbeta$ is a linear
 predictor and $\sigmaEps$ is the standard deviation of the error in predicting
-the outcome. The likelihood of the entire sample is the product of $N$
-individual likelihood contributions and it is well known that the likelihood is
-maximized when the sum-of-squared residuals is minimized. This occurs when
-
+the outcome. For a sample of size $N$, the likelihood of the entire sample is
+the product of the $N$ individual likelihood contributions and it is well known
+that the likelihood is maximized when the sum-of-squared residuals is minimized.
+This occurs when
+%
 \begin{align*}
 \hatbeta &= \left(\X^\top \X \right)^{-1} \X^\top \y,\\
 \hatalpha &= \overline{y} - \overline{\mathbf{x}}^\top \hatbeta,\\
@@ -109,7 +110,7 @@ maximized when the sum-of-squared residuals is minimized. This occurs when
   \left(\y - \hatalpha - \X \hatbeta \right),
 \end{align*}
 %
-where $\overline{\mathbf{x}}$ is a vector that contains the sample means of the
+where $\overline{\mathbf{x}}$ is a vector of sample means for the
 $K$ predictors, $\X$ is a $N \times K$ matrix of \emph{centered} predictors,
 $\y$ is a $N$-vector of outcomes, and $\overline{y}$ is the sample mean of the
 outcome.
@@ -123,6 +124,7 @@ The QR decomposition is often used for numeric stability reasons (see the
 familiar {\tt lm} function in R), but, as we outline below, it is also useful
 for thinking about priors in a Bayesian version of the linear model.
 
+
 \section{Priors}
 
 The key innovation in this paper is the prior for the parameters in the
@@ -130,8 +132,8 @@ QR-reparameterized model. To understand this prior, we start with the equations
 that characterize the maximum likelihood solutions before observing the data on
 $\X$ and especially $\y$.
 
-What would the prior distribution of $\boldtheta = \Q^\top \y$ be? We can write
-its $k$-th element as
+Let $\boldtheta = \Q^\top \y$. We can write the $k$-th element of the vector
+$\boldtheta$ as
 $$\theta_k = \rho_k \sigma_y \sqrt{N - 1},$$
 where $\rho_k$ is the correlation between the $k$th column of $\Q$ and the
 outcome, $\sigma_y$ is the marginal standard deviation of the outcome, and
@@ -147,8 +149,9 @@ $b$ equal to $1$. A non-uniform prior on \Rsq is somewhat analogous to ridge
 regression, which is popular in data mining and produces better out-of-sample
 predictions than least squares because it penalizes $\boldbeta^\top \boldbeta$,
 usually after standardizing the predictors. In our case, an informative prior on
-\Rsq effectively penalizes $\boldrho^\top \boldrho$, which encourages
-$\boldbeta = \R^{-1} \boldtheta$ to be closer to the origin.
+\Rsq effectively penalizes $\boldrho^\top \boldrho$, which encourages the
+regression coefficients $\boldbeta = \R^{-1} \boldtheta$ to be closer to the
+origin.
 
 Lewandowski, Kurowicka, and Joe (2009) derives a distribution for a correlation
 matrix that depends on a single shape parameter $\eta > 0$, which implies the
@@ -169,7 +172,7 @@ $\left(\halfK - 1\right) / \left(\halfK + \eta - 2\right)$
 and does not exist if $K < 2$.
 
 \item $\locRsq$ is the prior mean on the $\left(0,1\right)$ interval, where
-the mean of a $Betadist{\halfK}{\eta}$ distribution is
+the mean of a $\Betadist{\halfK}{\eta}$ distribution is
 $\left(\halfK\right) / \left(\halfK + \eta\right)$.
 
 \item $\locRsq$ is the prior median on the $\left(0,1\right)$ interval.
@@ -192,9 +195,9 @@ For $\sigma_y$ we set $\sigma_y = \omega s_y$ where $s_y$ is the sample standard
 deviation of the outcome and $\omega > 0$ is an unknown scale parameter to be
 estimated. The only prior for $\omega$ that does not contravene Bayes' theorem
 in this situation is the Jeffreys prior,
-$$f\left(\omega\right) \propto \frac{1}{\omega},$$
+$$f_\omega \left(\omega\right) \propto \frac{1}{\omega},$$
 which is proportional to a Jeffreys prior on the unknown $\sigma_y$,
-$$f\left(\sigma_y\right) \propto \frac{1}{\sigma_y}
+$$f_{\sigma_y} \left(\sigma_y\right) \propto \frac{1}{\sigma_y}
 = \frac{1}{\omega \widehat{\sigma}_y} \propto \frac{1}{\omega}.$$
 This parameterization and prior makes it easy to work with any continuous
 outcome variable, no matter what its units of measurement are.
@@ -210,7 +213,6 @@ be proper, but we have also observed that a Gaussian prior with mean zero and
 standard deviation $\sigma_y / \sqrt{N}$ can work well in many cases.
 
 
-
 \section{Posterior}
 
 The previous sections imply a posterior distribution for $\omega$, $\alpha$,
@@ -220,7 +222,7 @@ of interest from the primitive parameters as:
 \begin{align*}
 \sigma_y &= \omega s_y \\
 \sigmaEps &= \sigma_y \sqrt{1 - R^2} \\
-\boldbeta &= \R^{-1} \mathbf{u} \sigma_y \sqrt{R^2 \left(N-1\right)}
+\boldbeta &= \R^{-1} \mathbf{u} \, \sigma_y \sqrt{R^2 \left(N-1\right)}
 \end{align*}
 
 When implementing this model, we actually utilize an improper uniform prior on
@@ -318,9 +320,9 @@ from which we obtain the estimated coefficients
 \end{lstlisting}
 
 Note that we have \emph{not} looked at the estimated \Rsq or $\sigma$ for the
-ordinary least squares model. We can estimate a Bayesian version of this model
-using the {\tt rstanarm} package by prepending {\tt stan\_} to the {\tt lm}
-call and specifying a prior mode for \Rsq using the {\tt R2} function:
+OLS model. We can estimate a Bayesian version of this model using the
+{\tt rstanarm} package by prepending {\tt stan\_} to the {\tt lm} call and
+specifying a prior mode for \Rsq using the {\tt R2} function:
 
 \begin{lstlisting}
 > library("rstanarm")
