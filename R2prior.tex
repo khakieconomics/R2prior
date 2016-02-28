@@ -27,6 +27,7 @@
 \newcommand{\y}{\mathbf{y}}
 \newcommand{\Q}{\mathbf{Q}}
 \newcommand{\R}{\mathbf{R}}
+\renewcommand{\u}{\mathbf{u}}
 \newcommand{\locRsq}{\ell_{r^2}}
 \newcommand{\halfK}{\frac{K}{2}}
 \newcommand{\Betadist}[2]{\mathrm{Beta}\left(#1,#2\right)}
@@ -116,11 +117,11 @@ $\y$ is a $N$-vector of outcomes, and $\overline{y}$ is the sample mean of the
 outcome.
 
 Taking a QR decomposition of the design matrix, $\X = \Q\R$, where
-$\Q^\top \Q = \mathbf{I}$ and $\R$ is upper triangular, we can write the OLS
-solution for the coefficients as
+$\Q^\top \Q = \mathbf{I}$ and $\R$ is upper triangular, we can write the
+ordinary least squares (OLS) solution for the regression coefficients as
 $$\hatbeta = \left(\X^\top \X \right)^{-1} \X^\top \y = \R^{-1} \Q^\top \y.$$
 %
-The QR decomposition is often used for numeric stability reasons (see the
+The QR decomposition is often used for improved numerical stability (see the
 familiar {\tt lm} function in R), but, as we outline below, it is also useful
 for thinking about priors in a Bayesian version of the linear model.
 
@@ -129,9 +130,9 @@ for thinking about priors in a Bayesian version of the linear model.
 
 The key innovation in this paper is the prior for the parameters in the
 QR-reparameterized model, which can be thought of as a prior on the correlations
-between the outcome $\y$ and the columns of $\Q$. To understand this prior, we
-start with the equations that characterize the maximum likelihood solutions
-\emph{before} observing the data $\left(\y, \X\right)$.
+between the outcome $\y$ and the columns of the orthogonal matrix $\Q$. To
+understand this prior, we start with the equations that characterize the maximum
+likelihood solutions \emph{before} observing the data $\left(\y, \X\right)$.
 
 Let $\boldtheta = \Q^\top \y$. We can write the $k$-th element of the vector
 $\boldtheta$ as
@@ -139,15 +140,15 @@ $$\theta_k = \rho_k \sigma_y \sqrt{N - 1},$$
 where $\rho_k$ is the correlation between the $k$th column of $\Q$ and the
 outcome, $\sigma_y$ is the marginal standard deviation of the outcome, and
 $1/\sqrt{N-1}$ is the standard deviation of the $k$ column of $\Q$. Then let
-$\boldrho = \sqrt{r^2}\mathbf{u}$, where $\mathbf{u}$ is a unit vector that is
+$\boldrho = \sqrt{r^2}\u$, where $\u$ is a unit vector that is
 uniformally distributed on the surface of a hypersphere. Consequently,
-$\mathbf{u}^\top \mathbf{u} = 1$ implies that the sum of squared correlations is
+$\u^\top \u = 1$ implies that the sum of squared correlations is
 $\boldrho^\top \boldrho = r^2$, the familiar coefficient of determination for
 the linear model.
 
 An uninformative prior on \Rsq would be standard uniform, which is a special
-case of a $\Betadist{a}{b}$ distribution with both shape parameters $a$ and
-$b$ equal to $1$. A non-uniform prior on \Rsq is somewhat analogous to ridge
+case of a $\Betadist{a}{b}$ distribution with shape parameters $a = b = 1$.
+A non-uniform prior on \Rsq is somewhat analogous to ridge
 regression, which is popular in data mining and produces better out-of-sample
 predictions than least squares because it penalizes $\boldbeta^\top \boldbeta$,
 usually after standardizing the predictors. In our case, an informative prior on
@@ -155,11 +156,13 @@ usually after standardizing the predictors. In our case, an informative prior on
 regression coefficients $\boldbeta = \R^{-1} \boldtheta$ to be closer to the
 origin.
 
-Next, consider a correlation matrix among both the outcome and the predictors of
+Consider a correlation matrix among both the outcome and the predictors of
 our reparameterized model. Lewandowski, Kurowicka, and Joe (2009) derives a
 distribution for a correlation matrix that depends on a single shape parameter
 $\eta > 0$ and implies that the conditional variance of one variable given the
-remaining $K$ variables is distributed $\Betadist{\eta}{\halfK}$. From the
+remaining $K$ variables is distributed $\Betadist{\eta}{\halfK}$. In our case,
+this means that the conditional variance of $\y$ given the predictors,
+$1 - r^2$, has a $\Betadist{\eta}{\halfK}$ distribution. From the
 reflection symmetry of the Beta distribution, \Rsq is therefore distributed
 $\Betadist{\halfK}{\eta}$ and any prior information about the location of \Rsq,
 which we will denote $\locRsq$, can be used to choose a value of the
@@ -197,10 +200,10 @@ of $\eta$.
 Each of these specifications of $\locRsq$ implies a value of $\eta$,
 which is the single hyperparameter of the joint prior on the coefficients.
 
-For $\sigma_y$ we set $\sigma_y = \omega s_y$ where $s_y$ is the sample standard
-deviation of the outcome and $\omega > 0$ is an unknown scale parameter to be
-estimated. The only prior for $\omega$ that does not contravene Bayes' theorem
-in this situation is the Jeffreys prior,
+Next we must specify a prior for $\sigma_y$. We set $\sigma_y = \omega s_y$
+where $s_y$ is the sample standard deviation of the outcome and $\omega > 0$ is
+an unknown scale parameter to be estimated. The only prior for $\omega$ that
+does not contravene Bayes' theorem in this situation is the Jeffreys prior,
 $$f_\omega \left(\omega\right) \propto \frac{1}{\omega},$$
 which is proportional to a Jeffreys prior on the unknown $\sigma_y$,
 $$f_{\sigma_y} \left(\sigma_y\right) \propto \frac{1}{\sigma_y}
@@ -208,9 +211,9 @@ $$f_{\sigma_y} \left(\sigma_y\right) \propto \frac{1}{\sigma_y}
 This parameterization and prior makes it easy to work with any continuous
 outcome variable, no matter what its units of measurement are.
 
-We need not directly specify a prior for $\sigmaEps$ because our prior beliefs
-about $\sigmaEps$ are already implied by our beliefs about $\omega$ and \Rsq via
-the relation
+Finally, we need not directly specify a prior for $\sigmaEps$ because our prior
+beliefs about $\sigmaEps$ are already implied by our beliefs about $\omega$ and
+\Rsq via the relation
 $$\sigmaEps = \omega s_y \sqrt{1 - r^2}.$$
 Thus, the only remaining distribution to specify is a prior for
 $\alpha = \overline{y} - \overline{\mathbf{x}}^\top \R^{-1} \boldtheta$.
@@ -221,13 +224,13 @@ be proper.
 \section{Posterior}
 
 The previous sections imply a posterior distribution for $\omega$, $\alpha$,
-$\mathbf{u}$, and \Rsq. After fitting the model, we can recover the parameters
+$\u$, and \Rsq. After fitting the model, we can recover the parameters
 of interest from the primitive parameters as:
 %
 \begin{align*}
 \sigma_y &= \omega s_y \\
 \sigmaEps &= \sigma_y \sqrt{1 - r^2} \\
-\boldbeta &= \R^{-1} \mathbf{u} \, \sigma_y \sqrt{r^2 \left(N-1\right)}
+\boldbeta &= \R^{-1} \u \, \sigma_y \sqrt{r^2 \left(N-1\right)}
 \end{align*}
 
 When implementing this model, we actually utilize an improper uniform prior on
@@ -279,6 +282,10 @@ Statistical Analyses Using R (3rd Edition). R package version 1.0-5.
 
 \bibitem Hothorn, T., and Everitt, B. S. (2014). \emph{A Handbook of
 Statistical Analyses Using R}. Chapman \& Hall/CRC, third edition.
+
+\bibitem R Core Team (2015). R: A language and environment for statistical
+computing. R Foundation for Statistical Computing, Vienna, Austria.
+\url{https://www.R-project.org/}.
 
 
 \appendix
@@ -356,9 +363,8 @@ The posterior medians for the coefficients are
 
 
 The point estimates from the Bayesian model, which are represented by the
-posterior medians, appear quite different from the ordinary least squares
-estimates. However, the {\tt log-fit\_ratio} (i.e. $\log{\omega}$) is
-quite small
+posterior medians, appear quite different from the OLS estimates. However, the
+{\tt log-fit\_ratio} (i.e. $\log{\omega}$) is quite small
 
 \begin{lstlisting}
 > summary(post)["log-fit_ratio", "50%"]
@@ -366,12 +372,12 @@ quite small
 \end{lstlisting}
 
 which indicates that the model only slightly overfits the data when the prior
-derived above is utilized. Thus, it would be safe to conclude that the ordinary
-least squares estimator considerably overfits the data since there are only $24$
-observations with which to estimate $12$ parameters and no prior information is
-leveraged. In general, we would expect the prior derived in this paper to be
-well-suited in situations like the one above, where there are many predictors
-relative to the number of observations.
+derived above is utilized. Thus, it would be safe to conclude that the OLS
+estimator considerably overfits the data since there are only $24$ observations
+with which to estimate $12$ parameters and no prior information is leveraged. In
+general, we would expect the prior derived in this paper to be well-suited in
+situations like the one above, where there are many predictors relative to the
+number of observations.
 
 
 
