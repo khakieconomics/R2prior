@@ -16,7 +16,7 @@
 
 % Define a bunch of custom math shortcuts for expressions used many times
 % throughout the paper
-\newcommand{\Rsq}{$R^2\,$}
+\newcommand{\Rsq}{$r^2\,$}
 \newcommand{\boldrho}{\boldsymbol{\rho}}
 \newcommand{\boldbeta}{\boldsymbol{\beta}}
 \newcommand{\boldtheta}{\boldsymbol{\theta}}
@@ -27,7 +27,7 @@
 \newcommand{\y}{\mathbf{y}}
 \newcommand{\Q}{\mathbf{Q}}
 \newcommand{\R}{\mathbf{R}}
-\newcommand{\locRsq}{\ell_{R^2}}
+\newcommand{\locRsq}{\ell_{r^2}}
 \newcommand{\halfK}{\frac{K}{2}}
 \newcommand{\Betadist}[2]{\mathrm{Beta}\left(#1,#2\right)}
 \newcommand{\Digamma}[1]{\psi\left(#1\right)}
@@ -139,10 +139,10 @@ $$\theta_k = \rho_k \sigma_y \sqrt{N - 1},$$
 where $\rho_k$ is the correlation between the $k$th column of $\Q$ and the
 outcome, $\sigma_y$ is the marginal standard deviation of the outcome, and
 $1/\sqrt{N-1}$ is the standard deviation of the $k$ column of $\Q$. Then let
-$\boldrho = \sqrt{R^2}\mathbf{u}$, where $\mathbf{u}$ is a unit vector that is
+$\boldrho = \sqrt{r^2}\mathbf{u}$, where $\mathbf{u}$ is a unit vector that is
 uniformally distributed on the surface of a hypersphere. Consequently,
 $\mathbf{u}^\top \mathbf{u} = 1$ implies that the sum of squared correlations is
-$\boldrho^\top \boldrho = R^2$, the familiar coefficient of determination for
+$\boldrho^\top \boldrho = r^2$, the familiar coefficient of determination for
 the linear model.
 
 An uninformative prior on \Rsq would be standard uniform, which is a special
@@ -183,12 +183,12 @@ $\left(\halfK\right) / \left(\halfK + \eta\right)$.
 
 The median of a $\Betadist{\halfK}{\eta}$ distribution is not available in
 closed form, but if $K > 2$ the median is approximately equal to
-$\left(\halfK - \frac{1}{3}\right) / \left(\halfK + \eta - \frac{2}{3}\right)$.
-Regardless of whether $K > 2$, we can numerically solve for the value of $\eta$
-that is consistent with a given prior median.
+$\left(\halfK - \frac{1}{3}\right) / \left(\halfK + \eta - \frac{2}{3}\right)$
+(Kerman, 2011). Regardless of whether $K > 2$, we can numerically solve for the
+value of $\eta$ that is consistent with a given prior median.
 
 \item $\locRsq$ is some (negative) prior value for
-$E\left(\log{R^2}\right) = \Digamma{\halfK} - \Digamma{\halfK + \eta}$,
+$E\left(\log{r^2}\right) = \Digamma{\halfK} - \Digamma{\halfK + \eta}$,
 where $\Digamma{\cdot}$ is the Digamma function. Again, given a prior value for
 the left-hand side it is easy to numerically solve for the corresponding value
 of $\eta$.
@@ -211,7 +211,7 @@ outcome variable, no matter what its units of measurement are.
 We need not directly specify a prior for $\sigmaEps$ because our prior beliefs
 about $\sigmaEps$ are already implied by our beliefs about $\omega$ and \Rsq via
 the relation
-$$\sigmaEps = \omega s_y \sqrt{1 - R^2}.$$
+$$\sigmaEps = \omega s_y \sqrt{1 - r^2}.$$
 Thus, the only remaining distribution to specify is a prior for
 $\alpha = \overline{y} - \overline{\mathbf{x}}^\top \R^{-1} \boldtheta$.
 As a default, an improper uniform prior is possible as the posterior will still
@@ -226,8 +226,8 @@ of interest from the primitive parameters as:
 %
 \begin{align*}
 \sigma_y &= \omega s_y \\
-\sigmaEps &= \sigma_y \sqrt{1 - R^2} \\
-\boldbeta &= \R^{-1} \mathbf{u} \, \sigma_y \sqrt{R^2 \left(N-1\right)}
+\sigmaEps &= \sigma_y \sqrt{1 - r^2} \\
+\boldbeta &= \R^{-1} \mathbf{u} \, \sigma_y \sqrt{r^2 \left(N-1\right)}
 \end{align*}
 
 When implementing this model, we actually utilize an improper uniform prior on
@@ -265,6 +265,9 @@ Regression Modeling via Stan. R package version 2.9.0-3.
 \bibitem Guan, Y., and Stephens, M. (2011). Bayesian variable selection
 regression for genome-wide association studies, and other large-scale problems.
 \emph{Annals of Applied Statistics}. {\bf 5}(3): 1780--1815.
+
+\bibitem Kerman, J. (2011) A closed-form approximation for the median of the
+beta distribution. {\tt arXiv:1111.0433 [math.ST]}.
 
 \bibitem Lewandowski, D., Kurowicka D., and Joe, H. (2009). Generating random
 correlation matrices based on vines and extended onion method.
