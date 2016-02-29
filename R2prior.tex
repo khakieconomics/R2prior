@@ -6,7 +6,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
-\usepackage[bibnewpage, nosectionbib]{apacite} %apa citation style
+\usepackage[nosectionbib]{apacite} %apa citation style
 \bibliographystyle{apacite}
 \graphicspath{{./fig/}}
 
@@ -88,6 +88,7 @@ enough information to stabilize all the computations.
 
 
 \section{Likelihood}
+\label{sec:likelihood}
 
 The likelihood contribution for one observation $y_i$ under a linear model
 can be written as the conditionally normal density
@@ -129,6 +130,7 @@ for thinking about priors in a Bayesian version of the linear model.
 
 
 \section{Priors}
+\label{sec:priors}
 
 The key innovation in this paper is the prior for the parameters in the
 QR-reparameterized model, which can be thought of as a prior on the correlations
@@ -237,15 +239,23 @@ be proper.
 
 
 \section{Posterior}
+\label{sec:posterior}
 
 The previous sections imply a posterior distribution for $\omega$, $\alpha$,
-$\u$, and \Rsq. After fitting the model, we can recover the parameters
-of interest from the primitive parameters as:
+$\u$, and \Rsq
+%
+$$f(\omega, \alpha, \u, r^2 | \y, \X, \eta) \propto
+f(\omega) f(\alpha) f(\u) f(r^2 | K / 2, \eta)
+f(\y | \Q, \u, r^2, \omega, \alpha).$$
+%
+We can use Markov chain Monte Carlo (MCMC) to obtain draws from the posterior
+(see the example in Section~\ref{sec:example}), after which the parameters of
+interest can be recovered from the primitive parameters as
 %
 \begin{align*}
 \sigma_y &= \omega s_y \\
 \sigmaEps &= \sigma_y \sqrt{1 - r^2} \\
-\boldbeta &= \R^{-1} \u \, \sigma_y \sqrt{r^2 \left(N-1\right)}
+\boldbeta &= \R^{-1} \u \, \sigma_y \sqrt{r^2 \left(N-1\right)}.
 \end{align*}
 
 When implementing this model, we actually utilize an improper uniform prior on
@@ -263,6 +273,7 @@ badly underfits or overfits the data, then the model should be reconsidered.
 
 
 \section{Example}
+\label{sec:example}
 
 \lstset{
     language=R,
@@ -316,9 +327,10 @@ The frequentist estimator of this model can be replicated in R by executing
 \vspace{.5cm}
 
 Note that we have \emph{not} looked at the estimated \Rsq or $\sigma$ for the
-OLS model. We can estimate a Bayesian version of this model using the
-{\tt rstanarm} package by prepending {\tt stan\_} to the {\tt lm} call and
-specifying a prior mode for \Rsq using the {\tt R2} function:
+OLS model. We can estimate a Bayesian version of this model using the {\tt
+rstanarm} package, which will use Stan \cite{stan} to draw from the posterior
+distribution via MCMC. To fit the model we simply prepend {\tt stan\_} to the
+{\tt lm} call and specify a prior mode for \Rsq using the {\tt R2} function:
 
 \vspace{.5cm}
 \begin{lstlisting}[frame=lines]
@@ -342,9 +354,9 @@ specifying a prior mode for \Rsq using the {\tt R2} function:
 \vspace{.5cm}
 
 
-\noindent The point estimates from the Bayesian model, which are represented by the
-posterior medians, appear quite different from the OLS estimates. However, the
-{\tt log-fit\_ratio} (i.e. $\log{\omega}$) is quite small
+\noindent The point estimates from the Bayesian model, which are represented by
+the posterior medians, appear quite different from the OLS estimates. However,
+the {\tt log-fit\_ratio} (i.e. $\log{\omega}$) is quite small
 
 \vspace{.5cm}
 \begin{lstlisting}[frame=lines]
@@ -353,13 +365,13 @@ posterior medians, appear quite different from the OLS estimates. However, the
 \end{lstlisting}
 \vspace{.5cm}
 
-\noindent which indicates that the model only slightly overfits the data when the prior
-derived above is utilized. Thus, it would be safe to conclude that the OLS
-estimator considerably overfits the data since there are only $24$ observations
-with which to estimate $12$ parameters and no prior information is leveraged. In
-general, we would expect the prior derived in this paper to be well-suited in
-situations like the one above, where there are many predictors relative to the
-number of observations.
+\noindent which indicates that the model only slightly overfits the data when
+the prior derived above is utilized. Thus, it would be safe to conclude that the
+OLS estimator considerably overfits the data since there are only $24$
+observations with which to estimate $12$ parameters and no prior information is
+leveraged. In general, we would expect the prior derived in this paper to be
+well-suited in situations like the one above, where there are many predictors
+relative to the number of observations.
 
 
 
