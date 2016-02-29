@@ -6,13 +6,15 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage[bibnewpage, nosectionbib]{apacite} %apa citation style
+\bibliographystyle{apacite}
 \graphicspath{{./fig/}}
 
 % For R code snippets
 \usepackage{listings}
 
 % Bibliography spacing/indentation
-\makeatother\renewcommand{\bibitem}{\vskip 2pt\par\hangindent\parindent\hskip-\parindent}
+%\makeatother\renewcommand{\bibitem}{\vskip 2pt\par\hangindent\parindent\hskip-\parindent}
 
 % Define a bunch of custom math shortcuts for expressions used many times
 % throughout the paper
@@ -157,7 +159,7 @@ regression coefficients $\boldbeta = \R^{-1} \boldtheta$ to be closer to the
 origin.
 
 Consider a correlation matrix among both the outcome and the predictors of
-our reparameterized model. Lewandowski, Kurowicka, and Joe (2009) derives a
+our reparameterized model. Lewandowski, Kurowicka, and Joe \citeyear{lkj} derives a
 distribution for a correlation matrix that depends on a single shape parameter
 $\eta > 0$ and implies that the conditional variance of one variable given the
 remaining $K$ variables is distributed $\Betadist{\eta}{\halfK}$. In our case,
@@ -187,7 +189,7 @@ $\left(\halfK\right) / \left(\halfK + \eta\right)$.
 The median of a $\Betadist{\halfK}{\eta}$ distribution is not available in
 closed form, but if $K > 2$ the median is approximately equal to
 $\left(\halfK - \frac{1}{3}\right) / \left(\halfK + \eta - \frac{2}{3}\right)$
-(Kerman, 2011). Regardless of whether $K > 2$, we can numerically solve for the
+\cite{kerman}. Regardless of whether $K > 2$, we can numerically solve for the
 value of $\eta$ that is consistent with a given prior median.
 
 \item $\locRsq$ is some (negative) prior value for
@@ -260,49 +262,6 @@ ideal if the goal is to obtain good out-of-sample predictions. If the model
 badly underfits or overfits the data, then the model should be reconsidered.
 
 
-\section{Conclusion}
-
-Priors can be easy or hard for applied researchers to \emph{specify} and easy or
-hard for applied researchers to \emph{conceptualize}. Traditional shortcut
-priors on regression coefficients are often used because they are both easy to
-specify and to conceptualize. The informative prior on \Rsq proposed in this
-paper is more difficult to conceptualize, but with the recent release of the
-{\tt rstanarm} R package it is equally easy to specify.
-
-
-\section*{References}
-
-\noindent
-
-\bibitem Gabry, J., and Goodrich, B. (2016). rstanarm: Bayesian Applied
-Regression Modeling via Stan. R package version 2.9.0-3.
-\url{http://cran.r-project.org/package=rstanarm}
-
-\bibitem Guan, Y., and Stephens, M. (2011). Bayesian variable selection
-regression for genome-wide association studies, and other large-scale problems.
-\emph{Annals of Applied Statistics}. {\bf 5}(3): 1780--1815.
-
-\bibitem Kerman, J. (2011) A closed-form approximation for the median of the
-beta distribution. {\tt arXiv:1111.0433 [math.ST]}.
-
-\bibitem Lewandowski, D., Kurowicka D., and Joe, H. (2009). Generating random
-correlation matrices based on vines and extended onion method.
-\emph{Journal of Multivariate Analysis}. {\bf 100}(9): 1989--2001.
-
-\bibitem Hothorn, T., and Everitt, B. S. (2015).  HSAUR3: A Handbook of
-Statistical Analyses Using R (3rd Edition). R package version 1.0-5.
-\url{http://cran.r-project.org/package=HSAUR3}
-
-\bibitem Hothorn, T., and Everitt, B. S. (2014). \emph{A Handbook of
-Statistical Analyses Using R}. Chapman \& Hall/CRC, third edition.
-
-\bibitem R Core Team (2015). R: A language and environment for statistical
-computing. R Foundation for Statistical Computing, Vienna, Austria.
-\url{https://www.R-project.org/}.
-
-
-\appendix
-\clearpage
 \section{Example}
 
 \lstset{
@@ -311,14 +270,20 @@ computing. R Foundation for Statistical Computing, Vienna, Austria.
     literate={~} {$\sim$}{1}
     }
 
+We have implemented the proposed prior distribution in the {\tt stan\_lm}
+function in the {\tt rstanarm} R package \cite{rstanarm}.\footnote{Source
+code can be found at \url{https://github.com/stan-dev/rstanarm}.}
+Here we provide a brief demonstration.
+
 We will utilize an example from the {\tt HSAUR3} R package, which is used in the
-2014 third edition of \emph{A Handbook of Statistical Analyses Using R}.
-The model in section 5.3.1 analyzes an experiment where clouds were seeded
-with different amounts of silver iodide to see if there was increased rainfall.
-This effect could vary according to covariates, which (except for time) are
-interacted with the treatment variable. Most people would probably be skeptical
-that cloud hacking could explain very much of the variation in rainfall and
-thus the prior mode of the \Rsq would probably be fairly small.
+third edition of \emph{A Handbook of Statistical Analyses Using R}
+\cite{HSAUR3-book}. The model in section 5.3.1 analyzes an experiment where
+clouds were seeded with different amounts of silver iodide to see if there was
+increased rainfall. This effect could vary according to covariates, which
+(except for time) are interacted with the treatment variable. Most people would
+probably be skeptical that cloud hacking could explain very much of the
+variation in rainfall and thus the prior mode of the \Rsq would probably be
+fairly small.
 
 The frequentist estimator of this model can be replicated in R by executing
 
@@ -392,6 +357,22 @@ general, we would expect the prior derived in this paper to be well-suited in
 situations like the one above, where there are many predictors relative to the
 number of observations.
 
+
+
+\section{Conclusion}
+
+Priors can be easy or hard for applied researchers to \emph{specify} and easy or
+hard for applied researchers to \emph{conceptualize}. Traditional shortcut
+priors on regression coefficients are often used because they are both easy to
+specify and to conceptualize. The informative prior on \Rsq proposed in this
+paper is more difficult to conceptualize, but with the recent release of the
+{\tt rstanarm} R package it is equally easy to specify.
+
+
+\nocite{guan}
+\nocite{Rcore}
+\nocite{HSAUR3-package}
+\bibliography{references.bib}
 
 
 % End document
