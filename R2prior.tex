@@ -208,7 +208,7 @@ Figure~\ref{fig:betaplot}).
 
 \begin{figure}
 \centering
-\includegraphics[width=.67\textwidth]{betaplot.pdf}{\vspace{-.5cm}}
+\includegraphics[width=.67\textwidth]{betaplot.pdf}{\vspace{-.25cm}}
 \caption{\em Implied marginal prior on standardized regression coefficients
 (computed from 100,000 draws) with $K = 10$ and different values for $\eta$. As
 $\eta$ increases the prior becomes more concentrated around zero.}
@@ -287,15 +287,18 @@ fairly small.
 
 The frequentist estimator of this model can be replicated in R by executing
 
-\begin{lstlisting}
+\vspace{.5cm}
+\begin{lstlisting}[frame=lines]
 > data("clouds", package = "HSAUR3")
-> mod <- rainfall ~ seeding * (sne + cloudcover + prewetness + echomotion) + time
-> ols <- lm(mod, data = clouds)
+> mod <- rainfall ~ seeding * (sne+cloudcover+prewetness+echomotion) + time
+> ols <- lm(formula = mod, data = clouds)
 \end{lstlisting}
+\vspace{.5cm}
 
-from which we obtain the estimated coefficients
+\noindent from which we obtain the following estimated coefficients:
 
-\begin{lstlisting}
+\vspace{.5cm}
+\begin{lstlisting}[frame=lines]
 > round(coef(ols), digits = 3)
           (Intercept)                      seedingyes
            -0.346                           15.683
@@ -310,20 +313,18 @@ from which we obtain the estimated coefficients
           seedingyes:echomotionstationary
            -0.562
 \end{lstlisting}
+\vspace{.5cm}
 
 Note that we have \emph{not} looked at the estimated \Rsq or $\sigma$ for the
 OLS model. We can estimate a Bayesian version of this model using the
 {\tt rstanarm} package by prepending {\tt stan\_} to the {\tt lm} call and
 specifying a prior mode for \Rsq using the {\tt R2} function:
 
-\begin{lstlisting}
+\vspace{.5cm}
+\begin{lstlisting}[frame=lines]
 > library("rstanarm")
-> post <- stan_lm(mod, data = clouds, prior = R2(location = 0.2, what = "mode"))
-\end{lstlisting}
-
-The posterior medians for the coefficients are
-
-\begin{lstlisting}
+> post <- stan_lm(formula = mod, data = clouds,
+                  prior = R2(location = 0.2, what = "mode"))
 > round(coef(post), digits = 3)
           (Intercept)                      seedingyes
            2.303                            6.753
@@ -338,18 +339,21 @@ The posterior medians for the coefficients are
           seedingyes:echomotionstationary
            -0.264
 \end{lstlisting}
+\vspace{.5cm}
 
 
-The point estimates from the Bayesian model, which are represented by the
+\noindent The point estimates from the Bayesian model, which are represented by the
 posterior medians, appear quite different from the OLS estimates. However, the
 {\tt log-fit\_ratio} (i.e. $\log{\omega}$) is quite small
 
-\begin{lstlisting}
+\vspace{.5cm}
+\begin{lstlisting}[frame=lines]
 > summary(post)["log-fit_ratio", "50%"]
           -0.010
 \end{lstlisting}
+\vspace{.5cm}
 
-which indicates that the model only slightly overfits the data when the prior
+\noindent which indicates that the model only slightly overfits the data when the prior
 derived above is utilized. Thus, it would be safe to conclude that the OLS
 estimator considerably overfits the data since there are only $24$ observations
 with which to estimate $12$ parameters and no prior information is leveraged. In
