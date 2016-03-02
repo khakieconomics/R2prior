@@ -222,28 +222,28 @@ around zero.}
 
 \subsection{Log fit-ratio and prior for $\sigma_y$}
 Let $\sigma_y = \omega s_y$, where $s_y$ is the sample standard deviation of the
-outcome and $\omega > 0$ is an unknown scale parameter to be estimated. The only
-prior for $\omega$ that does not contravene Bayes' theorem in this situation is
-the Jeffreys prior,
-$$f_\omega \left(\omega\right) \propto \frac{1}{\omega},$$
+outcome and $\omega > 0$ is an unknown scale parameter to be estimated. We use
+the scale-invariant Jeffreys prior
+$f_\omega \left(\omega\right) \propto 1 / \omega,$
 which is proportional to a Jeffreys prior on the unknown $\sigma_y$,
 $$f_{\sigma_y} \left(\sigma_y\right) \propto \frac{1}{\sigma_y}
 = \frac{1}{\omega \widehat{\sigma}_y} \propto \frac{1}{\omega}.$$
-This parameterization and prior makes it easy to work with any continuous
-outcome variable, no matter what its units of measurement are.
+This is the only prior that does not contravene Bayes' theorem in this
+situation, as any other prior would result in the marginal standard deviation of
+the outcome being a function of the estimated standard deviation of the outcome.
+This parameterization and prior also makes it easy to work with any continuous
+outcome variable, regardless of the unit of measurement.
 
-When implementing the model, we prefer to instead work with $\omega$ on the log
-scale. A flat prior $f_\phi(\phi) \propto 1$, where $\phi = \log{\omega}$, is
-equivalent to the Jeffreys prior on $\omega$ itself. We refer to $\phi$ as the
-\emph{log fit-ratio} since
+When implementing the model we prefer to work with $\omega$ on the log scale
+so we use the flat prior $f_\phi(\phi) \propto 1$, where $\phi =
+\log{\omega}$, which is equivalent to the Jeffreys prior on $\omega$ itself. We
+refer to $\phi$ as the \emph{log fit-ratio} since it is the logarithm of the
+ratio of the marginal standard deviation of the outcome implied by the model to
+the observed sample standard deviation,
 %
-$$\phi = \log{\omega} = \log{\frac{\sigma_y}{s_y}}$$
-%
-is the logarithm of the ratio of the marginal standard deviation of the outcome
-\emph{implied by the model} to the observed sample standard deviation.
-Consequently, we can interpret the log fit-ratio as a measure of underfitting or
-overfitting.
+$$\phi = \log{\omega} = \log{\frac{\sigma_y}{s_y}}.$$
 
+We can interpret the log fit-ratio as a measure of underfitting or overfitting.
 If $\phi = 0$, then the marginal standard deviation of the outcome is the same
 as the sample standard deviation of the outcome. If $\phi > 0$, then the
 marginal standard deviation of the outcome implied by the model exceeds the
