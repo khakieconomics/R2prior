@@ -6,6 +6,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{hyperref}
 \usepackage[nosectionbib]{apacite} %apa citation style
 \bibliographystyle{apacite}
 \graphicspath{{./fig/}}
@@ -18,7 +19,7 @@
 
 % Define a bunch of custom math shortcuts for expressions used many times
 % throughout the paper
-\newcommand{\Rsq}{$r^2\,$}
+\newcommand{\Rsq}{$R^2\,$}
 \newcommand{\boldrho}{\boldsymbol{\rho}}
 \newcommand{\boldbeta}{\boldsymbol{\beta}}
 \newcommand{\boldtheta}{\boldsymbol{\theta}}
@@ -30,7 +31,7 @@
 \newcommand{\Q}{\mathbf{Q}}
 \newcommand{\R}{\mathbf{R}}
 \renewcommand{\u}{\mathbf{u}}
-\newcommand{\locRsq}{\ell_{r^2}}
+\newcommand{\locRsq}{\ell_{R^2}}
 \newcommand{\halfK}{\frac{K}{2}}
 \newcommand{\Betadist}[2]{\mathrm{Beta}\left(#1,#2\right)}
 \newcommand{\Digamma}[1]{\psi\left(#1\right)}
@@ -40,9 +41,9 @@
 % Title, authors, date
 \title{\bf Regularizing Bayesian linear models with an informative prior on \Rsq
     \vspace{.1in}}
-\author{Ben Goodrich\footnote{Columbia University}
-    \and Jonah Gabry$^{\ast}$
-    \and Andrew Gelman$^{\ast}$
+\author{Ben Goodrich
+    \and Jonah Gabry \\[.2in] Columbia University
+    \and Andrew Gelman
     \vspace{.1in}}
 \date{29 February 2016
     \vspace{-.2in}}
@@ -76,16 +77,30 @@ thoughtfully and take a shortcut by specifying a single prior distribution that
 is taken to apply to all regression coefficients as if they were independent of
 each other (and the intercept and error variance).
 
-In this paper we derive and demonstrate an approach for expressing  prior
-beliefs about the location of the \Rsq, the familiar proportion of variance in
-the outcome variable that is attributable to the predictors under a linear
-model. Since the \Rsq is a well-understood bounded scalar, it is easy to specify
-prior information about it. In particular, when there are many predictors
-relative to the number of observations we would expect the joint prior derived
-here to work better than placing independent, heavy-tailed priors on the
-coefficients, which neither reflects the beliefs of the researcher nor conveys
-enough information to stabilize all the computations.
+In this paper we derive and demonstrate an approach for directly expressing
+prior beliefs about the location of the \Rsq, the familiar proportion of
+variance in the outcome variable that is attributable to the predictors under a
+linear model. Our work shares some common themes with other research. For
+example, \citeA{guan} proposes a sparcity-inducing prior on the coefficients of
+a linear model that has implications for the \Rsq. In particular, their prior
+relaxes the assumption of prior independence between the parameter representing
+the typical magnitude of the non-zero coefficients and the parameter governing
+sparcity, which allows for the a priori expectation that the proportion of
+variance explained does not necessarily increase markedly with model complexity.
 
+Our approach does not induce sparcity in that all coefficients will be nonzero,
+but does lead to substantial shrinkage towards zero. The degree of shrinkage
+depends on the number of estimated effects and, in particular, on prior
+information provided by the researcher about \Rsq. Since the \Rsq is a
+well-understood bounded scalar it is easy to specify prior information about it
+and, for most applied problems, researchers will have enough familiarity with
+their subject matter to have some a priori knowledge about the extent to which
+their predictors will account for variation in the outcome. In particular, when
+there are many predictors relative to the number of observations we would expect
+the joint prior derived here to work better than placing independent,
+heavy-tailed priors on the regression coefficients in the linear model, which
+neither reflects the beliefs of the researcher nor conveys enough information to
+stabilize all the computations.
 
 \section{QR-reparameterized likelihood}
 \label{sec:likelihood}
@@ -94,16 +109,17 @@ The likelihood contribution for one observation $y_i$ under a linear model
 can be written as the conditionally normal density
 
 $$
-f \left(y_i \given \mu_i, \sigmaEps \right) = \frac{1}{\sigmaEps \sqrt{2 \pi}}
+f \left(y_i \given \mu_i, \sigmaEps \right) =
+N\left(y_i \given \mu_i, \sigmaEps \right) =
+\frac{1}{\sigmaEps \sqrt{2 \pi}}
 \exp{\left\{-\frac{1}{2} \left(\frac{y_i - \mu_i}{\sigmaEps}\right)^2\right\}},
 $$
 %
-where $\mu_i = \alpha + \mathbf{x}_i^\top \boldbeta$ is a linear
-predictor and $\sigmaEps$ is the standard deviation of the error in predicting
-the outcome. For a sample of size $N$, the likelihood of the entire sample is
-the product of the $N$ individual likelihood contributions and it is well known
-that the likelihood is maximized when the sum-of-squared residuals is minimized.
-This occurs when
+where $\mu_i = \alpha + \mathbf{x}_i^\top \boldbeta$ is a linear predictor and
+$\sigmaEps$ is the standard deviation of the error in predicting the outcome.
+For a sample of size $N$, the likelihood of the entire sample is the product of
+the $N$ individual likelihood contributions and it is well known that it is
+maximized when the sum-of-squared residuals is minimized. This occurs when
 %
 \begin{align*}
 \hatbeta &= \left(\X^\top \X \right)^{-1} \X^\top \y,\\
@@ -119,9 +135,10 @@ $K$ predictors, $\X$ is a $N \times K$ matrix of \emph{centered} predictors,
 $\y$ is a $N$-vector of outcomes, and $\overline{y}$ is the sample mean of the
 outcome.
 
-Taking a QR decomposition of the design matrix, $\X = \Q\R$, where
-$\Q^\top \Q = \mathbf{I}$ and $\R$ is upper triangular, we can write the
-ordinary least squares (OLS) solution for the regression coefficients as
+Taking a QR decomposition of the design matrix, $\X = \Q\R$, where $\Q^\top \Q =
+\mathbf{I}$ and $\R$ is upper triangular, we can write the maximum likelihood
+estimate for the regression coefficients --- the ordinary least squares (OLS)
+solution --- as
 $$\hatbeta = \left(\X^\top \X \right)^{-1} \X^\top \y = \R^{-1} \Q^\top \y.$$
 %
 The QR decomposition is often used for improved numerical stability (see the
@@ -144,10 +161,10 @@ $$\theta_k = \rho_k \, \sigma_y \, \sqrt{N - 1},$$
 where $\rho_k$ is the correlation between the $k$th column of $\Q$ and the
 outcome, $\sigma_y$ is the marginal standard deviation of the outcome, and
 $1/\sqrt{N-1}$ is the standard deviation of the $k$ column of $\Q$. Then let
-$\boldrho = \sqrt{r^2}\u$, where $\u$ is a unit vector that is
+$\boldrho = \sqrt{R^2}\u$, where $\u$ is a unit vector that is
 uniformally distributed on the surface of a hypersphere. Consequently,
 $\u^\top \u = 1$ implies that the sum of squared correlations is
-$\boldrho^\top \boldrho = r^2$, the familiar coefficient of determination for
+$\boldrho^\top \boldrho = R^2$, the familiar coefficient of determination for
 the linear model.
 
 \subsection{Prior for \Rsq}
@@ -168,14 +185,14 @@ matrix that depends on a single shape parameter $\eta > 0$ and implies that the
 conditional variance of one variable given the remaining $K$ variables is
 distributed $\Betadist{\eta}{\halfK}$. In our case, this means that the
 conditional variance of $\y$ given the predictors is
-$$(1 - r^2) \sim \Betadist{\eta}{\halfK}$$
+$$(1 - R^2) \sim \Betadist{\eta}{\halfK}$$
 and, from the reflection symmetry of the Beta distribution, it follows that
-$$r^2 \sim \Betadist{\halfK}{\eta}.$$
+$$R^2 \sim \Betadist{\halfK}{\eta}.$$
 Any available prior information about the location of \Rsq, which we will denote
 $\locRsq$, can be used to choose a value of the hyperparameter $\eta$. The
 following are four ways of implying the value of $\eta$ by taking
-$\locRsq$ to be (1) the prior mode of $r^2$, (2) the prior median of $r^2$,
-(3) the prior mean of $r^2$, and (4) the prior mean of $\log{r^2}$:
+$\locRsq$ to be (1) the prior mode of $R^2$, (2) the prior median of $R^2$,
+(3) the prior mean of $R^2$, and (4) the prior mean of $\log{R^2}$:
 
 \begin{enumerate}
 \item $\locRsq \in \left(0,1\right)$ is the prior mode, where the mode of a
@@ -199,9 +216,9 @@ $\left(\halfK - \frac{1}{3}\right) / \left(\halfK + \eta - \frac{2}{3}\right)$
 value of $\eta$ that is consistent with a given prior median.
 
 \item $\locRsq \in \left(-\infty,0\right)$ is the prior expectation of
-$\log{r^2}$, which can be expressed in terms of the Digamma function
+$\log{R^2}$, which can be expressed in terms of the Digamma function
 $\Digamma{\cdot}$ as
-$E\left(\log{r^2}\right) = \Digamma{\halfK} - \Digamma{\halfK + \eta}$. Again,
+$E\left(\log{R^2}\right) = \Digamma{\halfK} - \Digamma{\halfK + \eta}$. Again,
 given a prior value for the left-hand side we can numerically solve for the
 corresponding value of the shape hyperparameter $\eta$.
 \end{enumerate}
@@ -264,7 +281,7 @@ reconsidered.
 We need not directly specify a prior for $\sigmaEps$ because our prior beliefs
 about $\sigmaEps$ are already implied by our beliefs about $\omega$ and \Rsq via
 the relation
-$$\sigmaEps = \omega s_y \sqrt{1 - r^2}.$$
+$$\sigmaEps = \omega s_y \sqrt{1 - R^2}.$$
 Thus, the only remaining distribution to specify is a prior for
 $\alpha = \overline{y} - \overline{\mathbf{x}}^\top \R^{-1} \boldtheta$.
 As a default, an improper uniform prior $f_\alpha(\alpha) \propto 1$ is possible
@@ -274,15 +291,15 @@ as the posterior will still be proper.
 \label{sec:posterior}
 
 The previous sections imply a joint posterior distribution for the primitive
-parameters $\left(\phi, \alpha, \u, r^2 \right)$. As demonstrated in
+parameters $\left(\phi, \alpha, \u, R^2 \right)$. As demonstrated in
 Section~\ref{sec:example}, draws from the posterior can be obtained via Markov
 chain Monte Carlo (MCMC). We can then easily recover the parameters of primary
 interest from the primitive parameters as
 %
 \begin{align*}
 \sigma_y &= \omega s_y = e^\phi s_y \\
-\sigmaEps &= \sigma_y \sqrt{1 - r^2} \\
-\boldbeta &= \R^{-1} \u \, \sigma_y \sqrt{r^2 \left(N-1\right)},
+\sigmaEps &= \sigma_y \sqrt{1 - R^2} \\
+\boldbeta &= \R^{-1} \u \, \sigma_y \sqrt{R^2 \left(N-1\right)},
 \end{align*}
 %
 where each of these computations is performed for each draw from the posterior.
@@ -296,20 +313,23 @@ where each of these computations is performed for each draw from the posterior.
     literate={~} {$\sim$}{1}
     }
 
-We have implemented the proposed prior distribution in the {\tt stan\_lm}
-function in the {\tt rstanarm} R package \cite{rstanarm}.\footnote{Source
-code can be found at \url{https://github.com/stan-dev/rstanarm}.}
+We have implemented the proposed model and prior distribution in the {\tt
+stan\_lm} function in the {\tt rstanarm} R package \cite{rstanarm}.%
+\footnote{Source code for the {\tt rstanarm} package can be found at
+\url{https://github.com/stan-dev/rstanarm}. The Stan code used by the {\tt
+stan\_lm} function is available in the {\tt lm.stan} file in the {\tt exec}
+directory.}
 Here we provide a brief demonstration.
 
-We will utilize an example from the {\tt HSAUR3} R package, which is used in the
-third edition of \emph{A Handbook of Statistical Analyses Using R}
-\cite{HSAUR3-book}. The model in section 5.3.1 analyzes an experiment where
-clouds were seeded with different amounts of silver iodide to see if there was
-increased rainfall. This effect could vary according to covariates, which
-(except for time) are interacted with the treatment variable. Most people would
-probably be skeptical that cloud hacking could explain very much of the
-variation in rainfall and thus the prior mode of the \Rsq should be fairly
-small.
+We will utilize an example from the {\tt HSAUR3} R package, which is the
+companion R package to the third edition of \emph{A Handbook of Statistical
+Analyses Using R} \cite{HSAUR3-book}. The model in section 5.3.1 analyzes an
+experiment where clouds were seeded with different amounts of silver iodide to
+see if there was increased rainfall. This effect could vary according to
+covariates, which (except for time) are interacted with the treatment variable.
+Most people would probably be skeptical that cloud hacking could explain very
+much of the variation in rainfall and thus the prior mode of the \Rsq should be
+fairly small.
 
 The frequentist estimator of this model can be replicated in R by executing
 
@@ -393,11 +413,15 @@ Priors can be easy or hard for applied researchers to \emph{specify} and easy or
 hard for applied researchers to \emph{conceptualize}. Traditional shortcut
 priors on regression coefficients are often used because they are both easy to
 specify and to conceptualize. The informative prior on \Rsq proposed in this
-paper is more difficult to conceptualize, but with the implementation of the
-{\tt rstanarm} R package it is now equally easy to specify.
+paper is more difficult to conceptualize, but with its implementation in the
+{\tt rstanarm} R package it is now equally easy to specify. Furthermore,
+although in this paper we focus on a simple linear model, it is possible to
+extend this framework to more complicated scenarios. For example, we can allow
+for the stratification of observations and the shrinking of \Rsq values within
+each stratum toward a common global value, something we plan to implement in
+future versions of {\tt rstanarm}.
 
 
-\nocite{guan}
 \nocite{Rcore}
 \nocite{HSAUR3-package}
 \bibliography{references.bib}
