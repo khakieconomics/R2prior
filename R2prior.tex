@@ -103,6 +103,16 @@ the joint prior derived here to work better than placing independent,
 heavy-tailed priors on the regression coefficients in the linear model, which
 neither reflects the beliefs of the researcher nor conveys enough information to
 stabilize all the computations.
+The paper is organized as follows. We begin in Section~\ref{sec:likelihood} with
+a review of the linear model with a QR decomposition applied to the design
+matrix. Section~\ref{sec:priors} covers the specification of our proposed joint
+prior distribution for the parameters in the QR-reparameterized model. In
+Section~\ref{sec:posterior} we show how to recover the parameters of interest
+from the posterior distribution of the primitive parameters of the
+reparameterized model. Finally, in Section~\ref{sec:example} we demonstrate our
+implementation of the proposed model in the {\tt rstanarm} R package and then
+conclude with a brief discussion of possible extensions to the work presented
+here.
 
 \section{QR-reparameterized likelihood}
 \label{sec:likelihood}
