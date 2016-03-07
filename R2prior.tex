@@ -1,6 +1,5 @@
 \documentclass[11pt]{article}
 \usepackage{geometry}
-\linespread{1.02}
 
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -90,19 +89,20 @@ the parameter governing sparcity, which allows for the a priori expectation that
 the proportion of variance explained does not necessarily increase markedly with
 model complexity.
 
-Our approach does not induce sparcity per se --- all coefficients will be
-nonzero --- but does result in substantial shrinkage towards zero. The degree of
-shrinkage depends on the number of estimated effects and, in particular, on
-prior information provided by the researcher about \Rsq. Since the \Rsq is a
-well-understood bounded scalar it is easy to specify prior information about it
-and, for most applied problems, researchers will have enough familiarity with
-their subject matter to have some a priori knowledge about the extent to which
-their predictors will account for variation in the outcome. In particular, when
-there are many predictors relative to the number of observations we would expect
-the joint prior derived here to work better than placing independent,
-heavy-tailed priors on the regression coefficients in the linear model, which
-neither reflects the beliefs of the researcher nor conveys enough information to
-stabilize all the computations.
+Our approach results in a regularizing prior on the coefficients but does not
+induce sparcity in the sense of setting coefficients equal to exactly zero. The
+degree of shrinkage depends on the number of estimated effects and, in
+particular, on prior information provided by the researcher about \Rsq. Since
+the \Rsq is a well-understood bounded scalar it is easy to specify prior
+information about it and, for most applied problems, researchers will have
+enough familiarity with their subject matter to have some a priori knowledge
+about the extent to which their predictors will account for variation in the
+outcome. In particular, when there are many predictors relative to the number of
+observations we would expect the joint prior derived here to work better than
+placing independent, heavy-tailed priors on the regression coefficients in the
+linear model, which neither reflects the beliefs of the researcher nor conveys
+enough information to stabilize all the computations.
+
 The paper is organized as follows. We begin in Section~\ref{sec:likelihood} with
 a review of the linear model with a QR decomposition applied to the design
 matrix. Section~\ref{sec:priors} covers the specification of our proposed joint
@@ -119,7 +119,7 @@ here.
 
 The likelihood contribution for one observation $y_i$ under a linear model
 can be written as the conditionally normal density
-
+%
 $$
 f \left(y_i \given \mu_i, \sigmaEps \right) =
 N\left(y_i \given \mu_i, \sigmaEps \right) =
@@ -220,7 +220,6 @@ $$\eta = \frac{\halfK \left(1 - \locRsq\right) + 2\locRsq - 1}{\locRsq}.$$
 $\Betadist{\halfK}{\eta}$ distribution is \newline
 $\left(\halfK\right) / \left(\halfK + \eta\right)$. In this case we have
 $$\eta = \frac{\halfK \left(1 - \locRsq \right)}{\locRsq}.$$
-
 
 \item $\locRsq \in \left(0,1\right)$ is the prior median. The median is not
 available in closed form, but if $K > 2$ the median of a
@@ -379,8 +378,10 @@ seedingyes:echomotionstationary    -0.56       2.64
 
 Note that we have \emph{not} looked at the estimated \Rsq or $\sigma$ for the
 OLS model. We can estimate a Bayesian version of this model using the {\tt
-rstanarm} package, which will use Stan \cite{stan} to draw from the posterior
-distribution via MCMC. To fit the model we simply prepend {\tt stan\_} to the
+rstanarm} package. The {\tt stan\_lm} function will use Stan \cite{stan} to draw
+from the posterior distribution of the primitive parameters via MCMC and then
+use the equations in Section~\ref{sec:posterior} to obtain the estimates to be
+returned to the user. To fit the model we simply prepend {\tt stan\_} to the
 {\tt lm} call and specify a prior mode for \Rsq using the {\tt R2} function.%
 \footnote{The {\tt what} argument to the {\tt R2} function can take the values
 {\tt mode}, {\tt mean}, {\tt median}, and {\tt log}, corresponding to the four
