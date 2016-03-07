@@ -42,11 +42,11 @@
 %: Title, authors, date
 \title{\bf Regularizing Bayesian linear models with an informative prior on \Rsq
     \vspace{.1in}}
-\author{Ben Goodrich
-    \and Jonah Gabry \\[.2in] Columbia University
-    \and Andrew Gelman
+\author{Ben Goodrich\footnote{Columbia University, New York.}
+    \and Jonah Gabry$^\ast$
+    \and Andrew Gelman$^\ast$
     \vspace{.1in}}
-\date{29 February 2016
+\date{7 March 2016
     \vspace{-.2in}}
 
 %: Begin document
@@ -90,10 +90,10 @@ the parameter governing sparcity, which allows for the a priori expectation that
 the proportion of variance explained does not necessarily increase markedly with
 model complexity.
 
-Our approach does not induce sparcity in that all coefficients will be nonzero,
-but does lead to substantial shrinkage towards zero. The degree of shrinkage
-depends on the number of estimated effects and, in particular, on prior
-information provided by the researcher about \Rsq. Since the \Rsq is a
+Our approach does not induce sparcity per se --- all coefficients will be
+nonzero --- but does result in substantial shrinkage towards zero. The degree of
+shrinkage depends on the number of estimated effects and, in particular, on
+prior information provided by the researcher about \Rsq. Since the \Rsq is a
 well-understood bounded scalar it is easy to specify prior information about it
 and, for most applied problems, researchers will have enough familiarity with
 their subject matter to have some a priori knowledge about the extent to which
@@ -188,8 +188,8 @@ the conditional variance of one variable given the remaining $K$ variables has a
 Beta distribution with parameters $a = \eta$ and $b = \halfK$. In our case, this
 means that the conditional variance of $\y$ (given the predictors) is
 $$(1 - R^2) \sim \Betadist{\eta}{\halfK}.$$
-From the reflection symmetry of the Beta distribution it follows immediately
-that our prior on the \Rsq itself must be
+From the reflection symmetry of the Beta distribution it follows that our prior
+on the \Rsq itself is then
 $$R^2 \sim \Betadist{\halfK}{\eta}.$$
 Any available prior information about the location of \Rsq, which we will denote
 $\locRsq$, can be used to choose a value of the hyperparameter $\eta$.
@@ -426,8 +426,8 @@ However, the proposed framework is flexible enough to accomodate more
 complicated scenarios. For instance, a natural extension would be to allow for
 the stratification of observations and the shrinking of \Rsq values within each
 stratum toward a common global value.%
-\footnote{See \citeA{gelman-pardoe} for an example of how \Rsq can be defined at
-each level of a hierarchical model.}
+\footnote{See, for instance, \citeA{gelman-pardoe} for an example of how \Rsq
+can be defined at each level of a hierarchical model.}
 We plan to implement this feature in future versions of {\tt rstanarm}.
 
 
