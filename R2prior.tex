@@ -6,6 +6,7 @@
 \usepackage{enumerate}
 \usepackage{epsfig}
 \usepackage{graphicx}
+\graphicspath{{./fig/}}
 \usepackage{hyperref}
 \usepackage{relsize}
 \usepackage{url}
@@ -13,7 +14,6 @@
 % For apa-style bibliography
 \usepackage[nosectionbib]{apacite}
 \bibliographystyle{apacite}
-\graphicspath{{./fig/}}
 
 % For R code snippets
 \usepackage{listings}
@@ -36,7 +36,6 @@
 \newcommand{\Betadist}[2]{\mathrm{Beta}\left(#1,#2\right)}
 \newcommand{\Digamma}[1]{\psi\left(#1\right)}
 \newcommand{\given}{\left.\right|}
-
 
 %: Title, authors, date
 \title{\bf Regularizing Bayesian linear models with an informative prior on \Rsq
@@ -114,6 +113,7 @@ implementation of the proposed model in the {\tt rstanarm} R package and then
 conclude with a brief discussion of possible extensions to the work presented
 here.
 
+
 \section{QR-reparameterized likelihood}
 \label{sec:likelihood}
 
@@ -181,6 +181,7 @@ the linear model.
 
 \subsection{Prior for \Rsq}
 \label{subsec:r2prior}
+
 An uninformative prior on \Rsq would be standard uniform, which is a special
 case of a $\Betadist{a}{b}$ distribution with shape parameters $a = b = 1$.
 A non-uniform prior on \Rsq is somewhat analogous to ridge
@@ -231,9 +232,9 @@ value of $\eta$ that is consistent with a given prior median.
 \item $\locRsq \in \left(-\infty,0\right)$ is the prior expectation of
 $\log{R^2}$, which can be expressed in terms of the Digamma function
 $\Digamma{\cdot}$ as
-$E\left(\log{R^2}\right) = \Digamma{\halfK} - \Digamma{\halfK + \eta}$. Again,
-given a prior value for the left-hand side we can numerically solve for the
-corresponding value of the shape hyperparameter $\eta$.
+$E\left(\log{R^2}\right) = \Digamma{\halfK} - \Digamma{\halfK + \eta}$.
+Again, given a prior value for the left-hand side we can numerically solve for
+the corresponding value of the shape hyperparameter $\eta$.
 \end{enumerate}
 
 Each of these specifications of $\locRsq$ implies a value of the shape parameter
@@ -254,7 +255,7 @@ concentrated around zero.}
 \label{fig:betaplot}
 \end{figure}
 
-\subsection{Log fit-ratio and prior for $\sigma_y$}
+\subsection{Prior for the marginal standard deviation}
 Let $\sigma_y = \omega s_y$, where $s_y$ is the sample standard deviation of the
 outcome and $\omega > 0$ is an unknown scale parameter to be estimated. We use
 the scale-invariant Jeffreys prior
@@ -290,33 +291,45 @@ considered ideal if the goal is to obtain good out-of-sample predictions. If the
 model badly underfits or overfits the data, then the model should be
 reconsidered.
 
-\subsection{Prior for $\alpha$}
+\subsection{Prior for the model intercept}
 We need not directly specify a prior for $\sigmaEps$ because our prior beliefs
-about $\sigmaEps$ are already implied by our beliefs about $\omega$ and \Rsq via
-the relation
-$$\sigmaEps = \omega s_y \sqrt{1 - R^2}.$$
-Thus, the only remaining distribution to specify is a prior for
-$\alpha = \overline{y} - \overline{\mathbf{x}}^\top \R^{-1} \boldtheta$.
+about $\sigmaEps$ are implied by our beliefs about $\omega$ and \Rsq via the
+relations
+$$\sigmaEps = \sigma_y \sqrt{1 - R^2} = \omega s_y \sqrt{1 - R^2}.$$
+Thus, the only remaining distribution to specify is the prior for the model
+intercept
+$$\alpha = \overline{y} - \overline{\mathbf{x}}^\top \R^{-1} \boldtheta.$$
 As a default, an improper uniform prior $f_\alpha(\alpha) \propto 1$ is possible
-as the posterior will still be proper.
+as the resulting posterior distribution will be proper. Other choices of
+$f_\alpha$ are certainly possible, for instance a zero-mean normal
+with scale $\sigma_y / \sqrt{N}$.
 
 \section{Posterior}
 \label{sec:posterior}
 
 The previous sections imply a joint posterior distribution for the primitive
-parameters $\left(\phi, \alpha, \u, R^2 \right)$. As demonstrated in
-Section~\ref{sec:example}, draws from the posterior can be obtained via Markov
-chain Monte Carlo (MCMC). We can then easily recover the parameters of primary
-interest from the primitive parameters as
+parameters
+$$f_{\em post}\left(\phi, \alpha, \u, R^2 \given \y, \X = \Q\R, \eta\right).$$
+In Section~\ref{sec:example} we discuss sampling from this posterior using
+Markov chain Monte Carlo (MCMC). Here, assume we have already obtained a sample
+of size $S$ from $f_{post}$ consisting of draws
+$$\left(\phi, \alpha, \u, R^2\right)^{(s)}, \quad s = 1, \dots, S$$
+and we wish to make inferences using the parameters of interest
+$\boldbeta$, $\sigma_y$, and $\sigmaEps$. Following our definitions,
+we can obtain a sample from the posterior of
+$\left(\boldbeta, \sigma_y, \sigmaEps\right)$ from the MCMC draws of the
+primitive parameters by computing
 %
 \begin{align*}
-\sigma_y &= \omega s_y = e^\phi s_y \\
-\sigmaEps &= \sigma_y \sqrt{1 - R^2} \\
-\boldbeta &= \R^{-1} \u \, \sigma_y \sqrt{R^2 \left(N-1\right)},
+\sigma_y^{(s)} &= \omega^{(s)} s_y = e^{\phi^{(s)}} s_y \\
+\sigmaEps^{(s)} &= \sigma_y^{(s)} \sqrt{1 - {R^2}^{(s)}} \\
+\boldbeta^{(s)} &= \R^{-1}\, \u^{(s)} \, \sigma_y^{(s)}
+                      \sqrt{{R^2}^{(s)} \left(N-1\right)}
 \end{align*}
 %
-where these computations are performed for each posterior draw of the
-parameters.
+for each draw $s = 1, \dots, S$.
+
+
 
 \section{Example}
 \label{sec:example}
@@ -328,12 +341,8 @@ parameters.
     }
 
 We have implemented the proposed model and prior distribution in the {\tt
-stan\_lm} function in the {\tt rstanarm} R package \cite{rstanarm}.%
-\footnote{Source code for the {\tt rstanarm} package can be found at
-\url{https://github.com/stan-dev/rstanarm}. The Stan code used by the {\tt
-stan\_lm} function is available in the {\tt lm.stan} file in the {\tt exec}
-directory.}
-In this section we provide a brief demonstration.
+stan\_lm} function in the {\tt rstanarm} R package \cite{rstanarm}. In this
+section we provide a brief demonstration.
 
 We will utilize an example from the {\tt HSAUR3} R package, which is the
 companion R package to the third edition of \emph{A Handbook of Statistical
@@ -378,11 +387,14 @@ seedingyes:echomotionstationary    -0.56       2.64
 
 Note that we have \emph{not} looked at the estimated \Rsq or $\sigma$ for the
 OLS model. We can estimate a Bayesian version of this model using the {\tt
-rstanarm} package. The {\tt stan\_lm} function will use Stan \cite{stan} to draw
-from the posterior distribution of the primitive parameters via MCMC and then
-use the equations in Section~\ref{sec:posterior} to obtain the estimates to be
-returned to the user. To fit the model we simply prepend {\tt stan\_} to the
-{\tt lm} call and specify a prior mode for \Rsq using the {\tt R2} function.%
+rstanarm} package, which calls Stan \cite{stan} to draw from the posterior
+distribution of the primitive parameters via MCMC and then uses the equations in
+Section~\ref{sec:posterior} to obtain the estimates to be returned to the user.%
+\footnote{Source code for the {\tt rstanarm} package can be found at
+\url{https://github.com/stan-dev/rstanarm}. The relevant Stan code is
+available in the {\tt lm.stan} file in the {\tt exec} directory.}
+To fit the model we simply prepend {\tt stan\_} to the {\tt lm} call and specify
+a prior mode for \Rsq using the {\tt R2} function.%
 \footnote{The {\tt what} argument to the {\tt R2} function can take the values
 {\tt mode}, {\tt mean}, {\tt median}, and {\tt log}, corresponding to the four
 methods for choosing $\eta$ via the specification of $\locRsq$ detailed in

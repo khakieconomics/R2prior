@@ -34,4 +34,4 @@ ggplot(df, aes(x = x, color = eta)) +
         axis.text.y = element_blank(),
         axis.title.y = element_blank(),
         axis.text.x = element_text(size = 14))
-ggsave("betaplot.pdf")
+ggsave("fig/betaplot.pdf")
