@@ -33,9 +33,10 @@
 \renewcommand{\u}{\mathbf{u}}
 \newcommand{\locRsq}{\ell_{R^2}}
 \newcommand{\halfK}{\frac{K}{2}}
-\newcommand{\Betadist}[2]{\mathrm{Beta}\left(#1,#2\right)}
+\newcommand{\Betadist}[2]{\mathsf{Beta}\left(#1,#2\right)}
 \newcommand{\Digamma}[1]{\psi\left(#1\right)}
 \newcommand{\given}{\left.\right|}
+\newcommand{\draw}{{(s)}}
 
 %: Title, authors, date
 \title{\bf Regularizing Bayesian linear models with an informative prior on \Rsq
@@ -118,11 +119,11 @@ here.
 \label{sec:likelihood}
 
 The likelihood contribution for one observation $y_i$ under a linear model
-can be written as the conditionally normal density
+can be written as the conditional normal density
 %
 $$
 f \left(y_i \given \mu_i, \sigmaEps \right) =
-N\left(y_i \given \mu_i, \sigmaEps \right) =
+\mathsf{Normal}\left(y_i \given \mu_i, \sigmaEps \right) =
 \frac{1}{\sigmaEps \sqrt{2 \pi}}
 \exp{\left\{-\frac{1}{2} \left(\frac{y_i - \mu_i}{\sigmaEps}\right)^2\right\}},
 $$
@@ -130,8 +131,8 @@ $$
 where $\mu_i = \alpha + \mathbf{x}_i^\top \boldbeta$ is a linear predictor and
 $\sigmaEps$ is the standard deviation of the error in predicting the outcome.
 For a sample of size $N$, the likelihood of the entire sample is the product of
-the $N$ individual likelihood contributions and it is well known that it is
-maximized when the sum-of-squared residuals is minimized. This occurs when
+the $N$ individual likelihood contributions, and it is well known that it is
+maximized when the sum of squared residuals is minimized. This occurs when
 %
 \begin{align*}
 \hatbeta &= \left(\X^\top \X \right)^{-1} \X^\top \y,\\
@@ -153,7 +154,7 @@ estimate for the regression coefficients --- the ordinary least squares (OLS)
 solution --- as
 $$\hatbeta = \left(\X^\top \X \right)^{-1} \X^\top \y = \R^{-1} \Q^\top \y.$$
 %
-The QR decomposition is often used for improved numerical stability (see the
+The QR decomposition is often used for improved numerical stability (as in the
 familiar {\tt lm} function in R), but, as we outline below, it is also useful
 for thinking about priors in a Bayesian version of the linear model.
 
@@ -210,29 +211,34 @@ $\locRsq$ to be (a) the prior mode of $R^2$, (b) the prior median of $R^2$,
 (c) the prior mean of $R^2$, and (d) the prior mean of $\log{R^2}$:
 
 \begin{enumerate}[(a)]
-\item $\locRsq \in \left(0,1\right)$ is the prior mode, where the mode of a
+\item $\locRsq \in \left(0,1\right)$ is the prior mode. The mode of a
 $\Betadist{\halfK}{\eta}$ distribution is \newline
-$\left(\halfK - 1\right) / \left(\halfK + \eta - 2\right)$.
-This is only valid for $K \geq 2$ as otherwise the mode does not exist. If
-the mode does exist then we obtain
+$\left(\halfK - 1\right) / \left(\halfK + \eta - 2\right)$, which
+exists when the model has at least three predictors.\footnote{
+For the mode to exist both shape parameters must be greater than 1.
+If there are fewer than three predictors then $K \leq 2 \implies K/2 \leq 1$
+and this condition is not satisfied.
+}
+If the mode does exist then
 $$\eta = \frac{\halfK \left(1 - \locRsq\right) + 2\locRsq - 1}{\locRsq}.$$
 
-\item $\locRsq \in \left(0,1\right)$ is the prior mean, where the mean of a
+\item $\locRsq \in \left(0,1\right)$ is the prior mean. The mean of a
 $\Betadist{\halfK}{\eta}$ distribution is \newline
-$\left(\halfK\right) / \left(\halfK + \eta\right)$. In this case we have
-$$\eta = \frac{\halfK \left(1 - \locRsq \right)}{\locRsq}.$$
+$\left(\halfK\right) / \left(\halfK + \eta\right)$. Solving for $\eta$
+we obtain $$\eta = \frac{\halfK \left(1 - \locRsq \right)}{\locRsq}.$$
 
 \item $\locRsq \in \left(0,1\right)$ is the prior median. The median is not
 available in closed form, but if $K > 2$ the median of a
 $\Betadist{\halfK}{\eta}$ is approximately equal to
 $\left(\halfK - \frac{1}{3}\right) / \left(\halfK + \eta - \frac{2}{3}\right)$
 \cite{kerman}. However, even if $K \leq 2$, we can numerically solve for the
-value of $\eta$ that is consistent with a given prior median.
+value of $\eta$ that is consistent with a given value for the prior median.
 
-\item $\locRsq \in \left(-\infty,0\right)$ is the prior expectation of
-$\log{R^2}$, which can be expressed in terms of the Digamma function
-$\Digamma{\cdot}$ as
-$E\left(\log{R^2}\right) = \Digamma{\halfK} - \Digamma{\halfK + \eta}$.
+\item $\locRsq \in \left(-\infty,0\right)$ is
+$\mathbb{E}\left(\log{R^2}\right)$, the prior expectation of $\log{R^2}$. This
+expectation can be expressed in terms of the Digamma function $\Digamma{\cdot}$
+as
+$\mathbb{E}\left(\log{R^2}\right) = \Digamma{\halfK} - \Digamma{\halfK + \eta}$.
 Again, given a prior value for the left-hand side we can numerically solve for
 the corresponding value of the shape hyperparameter $\eta$.
 \end{enumerate}
@@ -256,6 +262,7 @@ concentrated around zero.}
 \end{figure}
 
 \subsection{Prior for the marginal standard deviation}
+\label{subsec:marginalSD}
 Let $\sigma_y = \omega s_y$, where $s_y$ is the sample standard deviation of the
 outcome and $\omega > 0$ is an unknown scale parameter to be estimated. We use
 the scale-invariant Jeffreys prior
@@ -266,8 +273,8 @@ $$f_{\sigma_y} \left(\sigma_y\right) \propto \frac{1}{\sigma_y}
 This is the only prior that does not contravene Bayes' theorem in this
 situation, as any other prior would result in the marginal standard deviation of
 the outcome being a function of the estimated standard deviation of the outcome.
-This parameterization and prior also makes it easy to work with any continuous
-outcome variable, regardless of the unit of measurement.
+This combination of parameterization and prior also makes it easy to work with
+any continuous outcome variable, regardless of the unit of measurement.
 
 When implementing the model we prefer to work with $\omega$ on the log scale
 so we use the flat prior $f_\phi(\phi) \propto 1$, where $\phi =
@@ -278,14 +285,21 @@ the observed sample standard deviation,
 %
 $$\phi = \log{\omega} = \log{\frac{\sigma_y}{s_y}}.$$
 
-We can interpret the log fit-ratio as a measure of underfitting or overfitting.
-If $\phi = 0$, then the marginal standard deviation of the outcome is the same
-as the sample standard deviation of the outcome. If $\phi > 0$, then the
-marginal standard deviation of the outcome implied by the model exceeds the
-sample standard deviation, which is to say that the model overfits the data.
-Otherwise $\phi < 0$, in which case the marginal standard deviation of the
-outcome implied by the model is less than the sample standard deviation and so
-the model underfits the data (or the data-generating process is nonlinear).
+We can interpret the log fit-ratio $\phi$ as a measure of underfitting or overfitting.
+There are three general possibilities:
+
+\begin{enumerate}
+\item If $\phi = 0$, then the marginal standard deviation of
+the outcome implied by the model is the same as the sample standard deviation of
+the outcome  ($\sigma_y = s_y$).
+\item If $\phi > 0$, then the marginal standard deviation of the outcome implied
+by the model exceeds the sample standard deviation ($\sigma_y > s_y$). That is,
+the model overfits the data.
+\item If $\phi < 0$, then the marginal standard deviation of the outcome implied
+by the model is less than the sample standard deviation  ($\sigma_y < s_y$).
+Either the model underfits the data or the data generating process is nonlinear.
+\end{enumerate}
+%
 Given the regularizing nature of the prior on \Rsq, a minor underfit would be
 considered ideal if the goal is to obtain good out-of-sample predictions. If the
 model badly underfits or overfits the data, then the model should be
@@ -293,15 +307,22 @@ reconsidered.
 
 \subsection{Prior for the model intercept}
 We need not directly specify a prior for $\sigmaEps$ because our prior beliefs
-about $\sigmaEps$ are implied by our beliefs about $\omega$ and \Rsq via the
-relations
-$$\sigmaEps = \sigma_y \sqrt{1 - R^2} = \omega s_y \sqrt{1 - R^2}.$$
-Thus, the only remaining distribution to specify is the prior for the model
-intercept
+about $\sigmaEps$ are fully implied by our beliefs about $\omega$ and
+\Rsq via the relations
+%
+\begin{align*}
+  \sigmaEps
+    &= \sigma_y \sqrt{1 - R^2} \\
+    & = \omega s_y \sqrt{1 - R^2},
+\end{align*}
+%
+which follow from the definition of $R^2$ and the definition of $\sigma_y$ in
+terms of $\omega$ and $s_y$ from Section~\ref{subsec:marginalSD}. Thus, the only
+remaining distribution to specify is the prior for the model intercept
 $$\alpha = \overline{y} - \overline{\mathbf{x}}^\top \R^{-1} \boldtheta.$$
 As a default, an improper uniform prior $f_\alpha(\alpha) \propto 1$ is possible
 as the resulting posterior distribution will be proper. Other choices of
-$f_\alpha$ are certainly possible, for instance a zero-mean normal
+$f_\alpha$ are also viable, for instance a zero-mean normal
 with scale $\sigma_y / \sqrt{N}$.
 
 \section{Posterior}
@@ -312,19 +333,22 @@ parameters
 $$f_{\em post}\left(\phi, \alpha, \u, R^2 \given \y, \X = \Q\R, \eta\right).$$
 In Section~\ref{sec:example} we discuss sampling from this posterior using
 Markov chain Monte Carlo (MCMC). Here, assume we have already obtained a sample
-of size $S$ from $f_{post}$ consisting of draws
-$$\left(\phi, \alpha, \u, R^2\right)^{(s)}, \quad s = 1, \dots, S$$
-and we wish to make inferences using the parameters of interest
-$\boldbeta$, $\sigma_y$, and $\sigmaEps$. Following our definitions,
-we can obtain a sample from the posterior of
-$\left(\boldbeta, \sigma_y, \sigmaEps\right)$ from the MCMC draws of the
-primitive parameters by computing
+of size $S$ from $f_{post}$ consisting of MCMC draws
+$$\left(\phi, \alpha, \u, R^2\right)^\draw
+= \left(\phi^\draw, \alpha^\draw, \u^\draw, R^2^\draw\right),
+\quad s = 1, \dots, S.$$
+Although some of these parameters are themselves useful (e.g, the log
+fit-ratio, $\phi$), we would like to make inferences with the posterior
+distribution of the parameters of interest $\boldbeta$, $\sigma_y$, and
+$\sigmaEps$. Following our definitions, we can obtain a sample from the
+posterior of $\left(\boldbeta, \sigma_y, \sigmaEps\right)$ from the MCMC draws
+of the primitive parameters by computing
 %
 \begin{align*}
-\sigma_y^{(s)} &= \omega^{(s)} s_y = e^{\phi^{(s)}} s_y \\
-\sigmaEps^{(s)} &= \sigma_y^{(s)} \sqrt{1 - {R^2}^{(s)}} \\
-\boldbeta^{(s)} &= \R^{-1}\, \u^{(s)} \, \sigma_y^{(s)}
-                      \sqrt{{R^2}^{(s)} \left(N-1\right)}
+\sigma_y^\draw &= \omega^\draw s_y = e^{\phi^\draw} s_y, \\
+\sigmaEps^\draw &= \sigma_y^\draw \sqrt{1 - {R^2}^\draw}, \\
+\boldbeta^\draw &= \R^{-1}\, \u^\draw \, \sigma_y^\draw
+                      \sqrt{{R^2}^\draw \left(N-1\right)},
 \end{align*}
 %
 for each draw $s = 1, \dots, S$.
