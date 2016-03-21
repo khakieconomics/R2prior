@@ -221,6 +221,8 @@ and this condition is not satisfied.
 }
 If the mode does exist then
 $$\eta = \frac{\halfK \left(1 - \locRsq\right) + 2\locRsq - 1}{\locRsq}.$$
+Figure~\ref{fig:etavslocplot} shows the relationship between $\eta$ and the
+prior mode $\locRsq$ for several different values of K.
 
 \item $\locRsq \in \left(0,1\right)$ is the prior mean. The mean of a
 $\Betadist{\halfK}{\eta}$ distribution is \newline
@@ -243,12 +245,22 @@ Again, given a prior value for the left-hand side we can numerically solve for
 the corresponding value of the shape hyperparameter $\eta$.
 \end{enumerate}
 
+\begin{figure}
+\centering
+\includegraphics[width=.67\textwidth]{eta_vs_location_plot.pdf}{\vspace{-.25cm}}
+\caption{\em \small The value of the shape parameter $\eta$ as a function of
+the prior mode of $R^2$ for different values of $K$, the number of predictors.
+In order to make the plotted curves easily visible we zoom vertically to the
+region between 0 and 2000 on the $y$-axis.}
+\label{fig:etavslocplot}
+\end{figure}
+
 Each of these specifications of $\locRsq$ implies a value of the shape parameter
 $\eta$, which is the single hyperparameter of the joint prior on the
 coefficients. Smaller values for $\locRsq$ will correspond to larger values of
-$\eta$, smaller prior correlations among the outcome and predictors, and a prior
-density for the regression coefficients more concentrated around zero (see
-Figure~\ref{fig:betaplot}).
+$\eta$ (Figure~\ref{fig:etavslocplot}), smaller prior correlations among the
+outcome and predictors, and a prior density for the regression coefficients more
+concentrated around zero (Figure~\ref{fig:betaplot}).
 
 \begin{figure}
 \centering
