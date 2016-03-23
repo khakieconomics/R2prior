@@ -1,7 +1,7 @@
 library(ggplot2)
 
 # compute eta if loc is prior mode
-eta <- function(loc, K) (K/2 - 1  - loc * (K/2) + loc * 2) / loc
+eta_mode <- function(loc, K) (K/2 - 1  - loc * (K/2) + loc * 2) / loc
 
 N <- 500
 location <- rep(seq(0, 1, length.out = N), 4)
