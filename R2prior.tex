@@ -45,7 +45,7 @@
     \and Jonah Gabry$^\ast$
     \and Andrew Gelman$^\ast$
     \vspace{.1in}}
-\date{7 March 2016
+\date{23 March 2016
     \vspace{-.2in}}
 
 %: Begin document
@@ -104,7 +104,7 @@ linear model, which neither reflects the beliefs of the researcher nor conveys
 enough information to stabilize all the computations.
 
 The paper is organized as follows. We begin in Section~\ref{sec:likelihood} with
-a review of the linear model with a QR decomposition applied to the design
+a brief review of the linear model with a QR decomposition applied to the design
 matrix. Section~\ref{sec:priors} covers the specification of our proposed joint
 prior distribution for the parameters in the QR-reparameterized model. In
 Section~\ref{sec:posterior} we show how to recover the parameters of interest
@@ -124,7 +124,7 @@ can be written as the conditional normal density
 $$
 f \left(y_i \given \mu_i, \sigmaEps \right) =
 \mathsf{Normal}\left(y_i \given \mu_i, \sigmaEps \right) =
-\frac{1}{\sigmaEps \sqrt{2 \pi}}
+\frac{1}{\sigmaEps \sqrt{2 \pi}} \,
 \exp{\left\{-\frac{1}{2} \left(\frac{y_i - \mu_i}{\sigmaEps}\right)^2\right\}},
 $$
 %
@@ -168,17 +168,21 @@ between the outcome $\y$ and the columns of the orthogonal matrix $\Q$. To
 understand this prior, we start with the equations that characterize the maximum
 likelihood solutions \emph{before} observing the data $\left(\y, \X\right)$.
 
-Let $\boldtheta = \Q^\top \y$. We can write the $k$-th element of the vector
-$\boldtheta$ as
-$$\theta_k = \rho_k \, \sigma_y \, \sqrt{N - 1},$$
-where $\rho_k$ is the correlation between the $k$th column of $\Q$ and the
-outcome, $\sigma_y$ is the marginal standard deviation of the outcome, and
-$1/\sqrt{N-1}$ is the standard deviation of the $k$ column of $\Q$. Then let
-$\boldrho = \sqrt{R^2} \, \u$, where $\u$ is a unit vector that is
-uniformally distributed on the surface of a hypersphere. Consequently,
-$\u^\top \u = 1$ implies that the sum of squared correlations is
-$\boldrho^\top \boldrho = R^2$, the familiar coefficient of determination for
-the linear model.
+Let $\boldtheta = \Q^\top \y$ and $\Q_k$ denote the $k$th column of $\Q$. We can
+write the $k$th element of the vector $\boldtheta$ as
+$$\theta_k
+  = {\rm Corr}(\y, \Q_k) \, \frac{{\rm sd}(\y)}{{\rm sd}(\Q_k)}
+  = \rho_k \, \sigma_y \, \sqrt{N - 1},
+$$
+where $\rho_k$ is the correlation between $\Q_k$ and the outcome, $\sigma_y$ is
+the marginal standard deviation of the outcome, and $1/\sqrt{N-1}$ is the
+standard deviation of $\Q_k$.
+
+Then let $\boldrho = \sqrt{R^2} \, \u$, where $\boldrho$ is the vector of
+correlations $\boldrho = (\rho_1, \dots, \rho_K)$ and $\u$ is a unit vector that is
+uniformally distributed on the surface of a hypersphere. Consequently, $\u^\top
+\u = 1$ implies that the sum of squared correlations is $\boldrho^\top \boldrho =
+R^2$, the familiar coefficient of determination for the linear model.
 
 \subsection{Prior for \Rsq}
 \label{subsec:r2prior}
@@ -188,58 +192,67 @@ case of a $\Betadist{a}{b}$ distribution with shape parameters $a = b = 1$.
 A non-uniform prior on \Rsq is somewhat analogous to ridge
 regression, which is popular in data mining and produces better out-of-sample
 predictions than least squares because it penalizes $\boldbeta^\top \boldbeta$,
-usually after standardizing the predictors. In our case, an informative prior on
-\Rsq effectively penalizes $\boldrho^\top \boldrho$, which encourages the
-regression coefficients $\boldbeta = \R^{-1} \boldtheta$ to be closer to the
-origin.
+usually after standardizing the predictors. In our case, an \emph{informative}
+prior on \Rsq will effectively penalize $\boldrho^\top \boldrho$, which
+encourages the regression coefficients $\boldbeta = \R^{-1} \boldtheta$
+to be closer to the origin.
 
 Consider a correlation matrix among both the outcome and the predictors of our
 reparameterized model. \citeA{lkj} derives a distribution for a correlation
 matrix that depends only on a single shape parameter $\eta > 0$ and implies that
 the conditional variance of one variable given the remaining $K$ variables has a
-Beta distribution with parameters $a = \eta$ and $b = \halfK$. In our case, this
-means that the conditional variance of $\y$ (given the predictors) is
-$$(1 - R^2) \sim \Betadist{\eta}{\halfK}.$$
-From the reflection symmetry of the Beta distribution it follows that our prior
-on the \Rsq itself is then
+Beta distribution with parameters $a = \eta$ and $b = \halfK$. This means that
+the conditional variance of $\y$ (given the predictors) is
+%
+$$(1 - R^2) \sim \Betadist{\eta}{\halfK}$$
+%
+and from the reflection symmetry of the Beta distribution it follows that our
+prior on the \Rsq itself is
+%
 $$R^2 \sim \Betadist{\halfK}{\eta}.$$
-Any available prior information about the location of \Rsq, which we will denote
-$\locRsq$, can be used to choose a value of the hyperparameter $\eta$.
 
-The following are four ways of implying the value of $\eta$ by taking
-$\locRsq$ to be (a) the prior mode of $R^2$, (b) the prior median of $R^2$,
-(c) the prior mean of $R^2$, and (d) the prior mean of $\log{R^2}$:
+Any available prior information about the location of \Rsq, which we will denote
+$\locRsq$, can be used to choose a value for the hyperparameter $\eta$. The
+following are four ways of implying the value of $\eta$ by taking $\locRsq$ to
+be (a) the prior mode of $R^2$, (b) the prior median of $R^2$, (c) the prior
+mean of $R^2$, and (d) the prior mean of $\log{R^2}$:
 
 \begin{enumerate}[(a)]
-\item $\locRsq \in \left(0,1\right)$ is the prior mode. The mode of a
-$\Betadist{\halfK}{\eta}$ distribution is \newline
-$\left(\halfK - 1\right) / \left(\halfK + \eta - 2\right)$, which
-exists when the model has at least three predictors.\footnote{
-For the mode to exist both shape parameters must be greater than 1.
-If there are fewer than three predictors then $K \leq 2 \implies K/2 \leq 1$
-and this condition is not satisfied.
-}
+\item $\locRsq \in \left(0,1\right)$ is the prior mode. \\[5pt]
+%
+The mode of a $\Betadist{\halfK}{\eta}$ distribution is
+$\left(\halfK - 1\right) / \left(\halfK + \eta - 2\right)$, which exists when
+the model has at least three predictors.%
+\footnote{For the mode to exist both shape parameters must be greater than 1. If
+there are fewer than three predictors then $K \leq 2 \implies K/2 \leq 1$ and
+this condition is not satisfied.}
 If the mode does exist then
+%
 $$\eta = \frac{\halfK \left(1 - \locRsq\right) + 2\locRsq - 1}{\locRsq}.$$
-Figure~\ref{fig:etavslocplot} shows the relationship between $\eta$ and the
-prior mode $\locRsq$ for several different values of K.
+%
+The relationship between $\eta$ and the prior mode $\locRsq$ for
+several different values of $K$ is shown in Figure~\ref{fig:etavslocplot}.
 
-\item $\locRsq \in \left(0,1\right)$ is the prior mean. The mean of a
-$\Betadist{\halfK}{\eta}$ distribution is \newline
-$\left(\halfK\right) / \left(\halfK + \eta\right)$. Solving for $\eta$
-we obtain $$\eta = \frac{\halfK \left(1 - \locRsq \right)}{\locRsq}.$$
+\item $\locRsq \in \left(0,1\right)$ is the prior mean. \\[5pt]
+%
+The mean of a $\Betadist{\halfK}{\eta}$ distribution is
+$\left(\halfK\right) / \left(\halfK + \eta\right)$. Solving for $\eta$ we obtain
+%
+$$\eta = \frac{\halfK \left(1 - \locRsq \right)}{\locRsq}.$$
 
-\item $\locRsq \in \left(0,1\right)$ is the prior median. The median is not
-available in closed form, but if $K > 2$ the median of a
+\item $\locRsq \in \left(0,1\right)$ is the prior median. \\[5pt]
+%
+The median is not available in closed form, but if $K > 2$ the median of a
 $\Betadist{\halfK}{\eta}$ is approximately equal to
 $\left(\halfK - \frac{1}{3}\right) / \left(\halfK + \eta - \frac{2}{3}\right)$
 \cite{kerman}. However, even if $K \leq 2$, we can numerically solve for the
 value of $\eta$ that is consistent with a given value for the prior median.
 
-\item $\locRsq \in \left(-\infty,0\right)$ is
-$\mathbb{E}\left(\log{R^2}\right)$, the prior expectation of $\log{R^2}$. This
-expectation can be expressed in terms of the Digamma function $\Digamma{\cdot}$
-as
+\item $\locRsq \in \left(-\infty,0\right)$ is the prior expectation of
+$\log{R^2}$. \\[5pt]
+%
+The expectation $\mathbb{E}\left(\log{R^2}\right)$ can be expressed in terms of
+the Digamma function $\Digamma{\cdot}$ as
 $\mathbb{E}\left(\log{R^2}\right) = \Digamma{\halfK} - \Digamma{\halfK + \eta}$.
 Again, given a prior value for the left-hand side we can numerically solve for
 the corresponding value of the shape hyperparameter $\eta$.
@@ -268,8 +281,8 @@ concentrated around zero (Figure~\ref{fig:betaplot}).
 \caption{\em \small Implied marginal prior for one of the $K$ standardized
 regression coefficients (computed from 10,000 draws). Here the value of $K$ is
 fixed at $100$ and the plotted densities correspond to different values of the
-hyperparameter $\eta$. For larger values of $\eta$ the prior is more
-concentrated around zero.}
+hyperparameter $\eta$. As the value of $\eta$ increases the prior becomes
+increasingly concentrated around zero.}
 \label{fig:betaplot}
 \end{figure}
 
@@ -281,7 +294,7 @@ the scale-invariant Jeffreys prior
 $f_\omega \left(\omega\right) \propto 1 / \omega,$
 which is proportional to a Jeffreys prior on the unknown $\sigma_y$,
 $$f_{\sigma_y} \left(\sigma_y\right) \propto \frac{1}{\sigma_y}
-= \frac{1}{\omega \widehat{\sigma}_y} \propto \frac{1}{\omega}.$$
+= \frac{1}{\omega s_y} \propto \frac{1}{\omega}.$$
 This is the only prior that does not contravene Bayes' theorem in this
 situation, as any other prior would result in the marginal standard deviation of
 the outcome being a function of the estimated standard deviation of the outcome.
@@ -297,8 +310,8 @@ the observed sample standard deviation,
 %
 $$\phi = \log{\omega} = \log{\frac{\sigma_y}{s_y}}.$$
 
-We can interpret the log fit-ratio $\phi$ as a measure of underfitting or overfitting.
-There are three general possibilities:
+We can interpret the log fit-ratio $\phi$ as a measure of underfitting or
+overfitting. There are three general possibilities:
 
 \begin{enumerate}
 \item If $\phi = 0$, then the marginal standard deviation of
@@ -322,20 +335,16 @@ We need not directly specify a prior for $\sigmaEps$ because our prior beliefs
 about $\sigmaEps$ are fully implied by our beliefs about $\omega$ and
 \Rsq via the relations
 %
-\begin{align*}
-  \sigmaEps
-    &= \sigma_y \sqrt{1 - R^2} \\
-    & = \omega s_y \sqrt{1 - R^2},
-\end{align*}
+$$ \sigmaEps = \sigma_y \sqrt{1 - R^2} = \omega s_y \sqrt{1 - R^2},$$
 %
 which follow from the definition of $R^2$ and the definition of $\sigma_y$ in
 terms of $\omega$ and $s_y$ from Section~\ref{subsec:marginalSD}. Thus, the only
 remaining distribution to specify is the prior for the model intercept
 $$\alpha = \overline{y} - \overline{\mathbf{x}}^\top \R^{-1} \boldtheta.$$
-As a default, an improper uniform prior $f_\alpha(\alpha) \propto 1$ is possible
-as the resulting posterior distribution will be proper. Other choices of
-$f_\alpha$ are also viable, for instance a zero-mean normal
-with scale $\sigma_y / \sqrt{N}$.
+As a default, a flat (improper uniform) prior $f_\alpha(\alpha) \propto 1$ is
+possible as the resulting posterior distribution will be proper. Other choices
+of $f_\alpha$ are also viable, for instance a zero-mean normal with scale
+$\sigma_y / \sqrt{N}$.
 
 \section{Posterior}
 \label{sec:posterior}
@@ -430,11 +439,11 @@ Section~\ref{sec:posterior} to obtain the estimates to be returned to the user.%
 \url{https://github.com/stan-dev/rstanarm}. The relevant Stan code is
 available in the {\tt lm.stan} file in the {\tt exec} directory.}
 To fit the model we simply prepend {\tt stan\_} to the {\tt lm} call and specify
-a prior mode for \Rsq using the {\tt R2} function.%
-\footnote{The {\tt what} argument to the {\tt R2} function can take the values
-{\tt mode}, {\tt mean}, {\tt median}, and {\tt log}, corresponding to the four
-methods for choosing $\eta$ via the specification of $\locRsq$ detailed in
-Section~\ref{subsec:r2prior}.}
+a prior mode for \Rsq using the {\tt R2} function. The {\tt what} argument to
+the {\tt R2} function can take the values {\tt "mode"}, {\tt "mean"},
+{\tt "median"}, and {\tt "log"}, corresponding to the four methods for
+choosing $\eta$ via the specification of $\locRsq$ detailed in
+Section~\ref{subsec:r2prior}.
 
 \vspace{.5cm}
 \begin{lstlisting}[frame=lines]
@@ -462,9 +471,9 @@ R2                               0.3    0.1
 
 The point estimates from the Bayesian model, which are represented by the
 posterior medians, appear quite different from the OLS estimates. However, the
-log fit-ratio ($\log{\omega}$) is estimated to be about $0$, which indicates a
-good fit of the model to the data. It would be safe to conclude that the OLS
-estimator considerably overfits the data since there are only $24$ observations
+log fit-ratio is estimated to be about $0$, which indicates a good fit of the
+model to the data. It would be safe to conclude that the OLS estimator
+considerably \emph{overfits} the data since there are only $24$ observations
 with which to estimate $12$ parameters and no prior information is leveraged. In
 general, we would expect the prior derived in this paper to be well-suited in
 situations like the one above, where there are many predictors relative to the
@@ -475,10 +484,10 @@ number of observations.
 
 Priors can be easy or hard for applied researchers to \emph{specify} and easy or
 hard for applied researchers to \emph{conceptualize}. Traditional shortcut
-priors on regression coefficients are often used because they are both easy to
-specify and to conceptualize. Although the proposed informative prior on \Rsq is
-certainly more difficult to conceptualize, with the implementation in the
-{\tt rstanarm} package it is now equally easy to specify.
+priors for regression coefficients are often used because they are both easy to
+specify and to conceptualize. In comparison, the informative prior on \Rsq
+proposed in this paper is difficult to conceptualize, but with its
+implementation in the {\tt rstanarm} package it is now equally easy to specify.
 
 In this paper we have only focused on the most basic linear regression models.
 However, the proposed framework is flexible enough to accomodate more
