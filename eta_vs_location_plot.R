@@ -1,5 +1,4 @@
 library(ggplot2)
-library(gridExtra)
 
 # compute eta if loc is prior mode
 eta <- function(loc, K) (K/2 - 1  - loc * (K/2) + loc * 2) / loc
