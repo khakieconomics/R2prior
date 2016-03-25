@@ -150,8 +150,8 @@ outcome.
 
 Taking a QR decomposition of the design matrix, $\X = \Q\R$, where $\Q^\top \Q =
 \mathbf{I}$ and $\R$ is upper triangular, we can write the maximum likelihood
-estimate for the regression coefficients --- the ordinary least squares (OLS)
-solution --- as
+estimate for the regression coefficients --- the least squares solution --- as
+%
 $$\hatbeta = \left(\X^\top \X \right)^{-1} \X^\top \y = \R^{-1} \Q^\top \y.$$
 %
 The QR decomposition is often used for improved numerical stability (as in the
@@ -399,13 +399,14 @@ Most people would probably be skeptical that cloud hacking could explain very
 much of the variation in rainfall and thus the prior mode of the \Rsq should be
 fairly small.
 
-The frequentist estimator of this model can be replicated in R by executing
+The least squares estimator of this model can be replicated in R by executing
 
 \vspace{.5cm}
 \begin{lstlisting}[frame=lines]
+> library(arm)  # we prefer arm's display() for printing lm() results
 > data("clouds", package = "HSAUR3")
 > mod <- rainfall ~ seeding * (sne+cloudcover+prewetness+echomotion) + time
-> ols <- lm(formula = mod, data = clouds)
+> mle <- lm(formula = mod, data = clouds)
 \end{lstlisting}
 \vspace{.5cm}
 
@@ -413,31 +414,34 @@ The frequentist estimator of this model can be replicated in R by executing
 
 \vspace{.5cm}
 \begin{lstlisting}[frame=lines]
-> s <- summary(ols)$coef
-> round(s[, 1:2], 2)
-                                  Estimate Std. Error
-(Intercept)                        -0.35       2.79
-seedingyes                         15.68       4.45
-sne                                 0.42       0.84
-cloudcover                          0.39       0.22
-prewetness                          4.11       3.60
-echomotionstationary                3.15       1.93
-time                               -0.04       0.03
-seedingyes:sne                     -3.20       1.27
-seedingyes:cloudcover              -0.49       0.24
-seedingyes:prewetness              -2.56       4.48
-seedingyes:echomotionstationary    -0.56       2.64
+> display(mle)
+lm(formula = mod, data = clouds)
+                                coef.est coef.se
+(Intercept)                     -0.35     2.79
+seedingyes                      15.68     4.45
+sne                              0.42     0.84
+cloudcover                       0.39     0.22
+prewetness                       4.11     3.60
+echomotionstationary             3.15     1.93
+time                            -0.04     0.03
+seedingyes:sne                  -3.20     1.27
+seedingyes:cloudcover           -0.49     0.24
+seedingyes:prewetness           -2.56     4.48
+seedingyes:echomotionstationary -0.56     2.64
+---
+n = 24, k = 11
+residual sd = 2.20, R-Squared = 0.72
 \end{lstlisting}
 \vspace{.5cm}
 
 Note that we have \emph{not} looked at the estimated \Rsq or $\sigma$ for the
-OLS model. We can estimate a Bayesian version of this model using the {\tt
-rstanarm} package, which calls Stan \cite{stan} to draw from the posterior
+least squares model. We can estimate a Bayesian version of this model using the
+{\tt rstanarm} package, which calls Stan \cite{stan} to draw from the posterior
 distribution of the primitive parameters via MCMC and then uses the equations in
 Section~\ref{sec:posterior} to obtain the estimates to be returned to the user.%
-\footnote{Source code for the {\tt rstanarm} package can be found at
-\url{https://github.com/stan-dev/rstanarm}. The relevant Stan code is
-available in the {\tt lm.stan} file in the {\tt exec} directory.}
+\footnote{The {\tt rstanarm} package is available from CRAN and source code can
+be found at \url{https://github.com/stan-dev/rstanarm}. The Stan code relevant
+to this paper is available in the {\tt lm.stan} file in the {\tt exec} directory.}
 To fit the model we simply prepend {\tt stan\_} to the {\tt lm} call and specify
 a prior mode for \Rsq using the {\tt R2} function. The {\tt what} argument to
 the {\tt R2} function can take the values {\tt "mode"}, {\tt "mean"},
@@ -448,36 +452,49 @@ Section~\ref{subsec:r2prior}.
 \vspace{.5cm}
 \begin{lstlisting}[frame=lines]
 > library("rstanarm")
-> post <- stan_lm(formula = mod, data = clouds,
-                  prior = R2(location = 0.2, what = "mode"))
+> R2prior <- R2(location = 0.2, what = "mode")
+> post <- stan_lm(formula = mod, data = clouds, prior = R2prior)
 > print(post)
+stan_lm(formula = mod, data = clouds, prior = R2prior)
+
+Estimates:
                                 Median MAD_SD
-(Intercept)                      2.4    2.2
-seedingyes                       6.5    3.5
-sne                              0.2    0.7
+(Intercept)                      2.5    2.2
+seedingyes                       6.6    3.7
+sne                              0.2    0.6
 cloudcover                       0.2    0.2
-prewetness                       1.8    2.8
+prewetness                       1.6    2.8
 echomotionstationary             1.3    1.5
 time                             0.0    0.0
 seedingyes:sne                  -1.3    1.0
 seedingyes:cloudcover           -0.2    0.2
-seedingyes:prewetness           -1.1    3.4
+seedingyes:prewetness           -0.9    3.5
 seedingyes:echomotionstationary -0.2    2.0
 sigma                            2.6    0.4
 log-fit_ratio                    0.0    0.1
 R2                               0.3    0.1
+
+Sample avg. posterior predictive distribution of y (X = xbar):
+         Median MAD_SD
+mean_PPD 4.5    2.7
 \end{lstlisting}
 \vspace{.5cm}
 
 The point estimates from the Bayesian model, which are represented by the
-posterior medians, appear quite different from the OLS estimates. However, the
-log fit-ratio is estimated to be about $0$, which indicates a good fit of the
-model to the data. It would be safe to conclude that the OLS estimator
-considerably \emph{overfits} the data since there are only $24$ observations
-with which to estimate $12$ parameters and no prior information is leveraged. In
-general, we would expect the prior derived in this paper to be well-suited in
-situations like the one above, where there are many predictors relative to the
-number of observations.
+posterior medians, appear quite different from the least squares estimates.
+However, the log fit-ratio is estimated to be about $0$, which indicates a good
+fit of the model to the data.%
+\footnote{The uncertainty estimates labeled {\tt MAD\_SD} are proportional to
+the median absolute deviation (MAD) from the posterior median. The {\tt
+rstanarm} package reports {\tt MAD\_SD} rather than the raw posterior standard
+deviations because the former will be more robust for long-tailed distributions.
+}
+It would be safe to conclude that the least
+squares estimator considerably \emph{overfits} the data since there are only
+$24$ observations with which to estimate $12$ parameters and no prior
+information is leveraged. In general, we would expect the prior derived in this
+paper to be well-suited in situations like the one above, where there are many
+predictors relative to the number of observations.
 
 
 \section{Conclusion}

@@ -13,8 +13,8 @@ ggplot(df, aes(x=x, y=y, color=K)) +
   geom_line(size = 1) + 
   xlab(expression(paste("Prior mode of ", R^2))) + 
   ylab(expression(paste("Implied value of ", eta))) + 
-  coord_cartesian(xlim = c(0, 1), ylim = c(0, 2000)) +
   scale_color_discrete(name = "K (predictors)") +
+  coord_cartesian(xlim = c(0, 1), ylim = c(0, 2000), expand = FALSE) +
   theme_classic() +
   theme(legend.position = c(.7, 0.8),
         legend.text = element_text(size = 14),
