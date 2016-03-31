@@ -66,6 +66,9 @@ information to stabilize all the computations.
 
 
 \section{Introduction}
+% Guys - overall I really liked it and learned a lot. 
+
+% A bit more signposting would really help readers like me (but might frustrate reviewers). Also an example that illustrates performance gains could be useful. Especially compared to glmnet! 
 
 Fully making Bayesian estimation of linear models routine for applied
 researchers requires prior distributions that work well for any data generated
@@ -128,6 +131,7 @@ f \left(y_i \given \mu_i, \sigmaEps \right) =
 \exp{\left\{-\frac{1}{2} \left(\frac{y_i - \mu_i}{\sigmaEps}\right)^2\right\}},
 $$
 %
+% Doesn't this work for $X_1 = 1$? Or does it fall over due to 0 correlation between y and a column of ones? 
 where $\mu_i = \alpha + \mathbf{x}_i^\top \boldbeta$ is a linear predictor and
 $\sigmaEps$ is the standard deviation of the error in predicting the outcome.
 For a sample of size $N$, the likelihood of the entire sample is the product of
@@ -197,6 +201,11 @@ prior on \Rsq will effectively penalize $\boldrho^\top \boldrho$, which
 encourages the regression coefficients $\boldbeta = \R^{-1} \boldtheta$
 to be closer to the origin.
 
+% I find this next paragraph a bit confusing. Do I need to consider a correlation matrix given cor(Q) = I? 
+% Can't we just consider the vector of $\rho$s below?
+
+% Also, the point about the conditional variance having a beta (and so being bounded) is a bit confusing. 
+% Has $y$ been standardized? This wasn't clear.  
 Consider a correlation matrix among both the outcome and the predictors of our
 reparameterized model. \citeA{lkj} derives a distribution for a correlation
 matrix that depends only on a single shape parameter $\eta > 0$ and implies that
@@ -216,6 +225,8 @@ $\locRsq$, can be used to choose a value for the hyperparameter $\eta$. The
 following are four ways of implying the value of $\eta$ by taking $\locRsq$ to
 be (a) the prior mode of $R^2$, (b) the prior median of $R^2$, (c) the prior
 mean of $R^2$, and (d) the prior mean of $\log{R^2}$:
+
+% The letters above don't line up with the letters below
 
 \begin{enumerate}[(a)]
 \item $\locRsq \in \left(0,1\right)$ is the prior mode. \\[5pt]
@@ -348,7 +359,7 @@ $\sigma_y / \sqrt{N}$.
 
 \section{Posterior}
 \label{sec:posterior}
-
+% This bit came as a bit of a surprise to me. I kind of need something to say very explicitly: we're using a beta prior on R^2 with a hyperparameter that we've backed out from the user-provided location, and a flat prior on the log-fit ratio. We've just shown that these (plus a "prior" on $u$) imply the parameters of the regression model, which we are treating as transformed parameters (this will make more sense to the Stan folk). The likelihood is just the normal likelihood as above... Hey presto.  
 The previous sections imply a joint posterior distribution for the primitive
 parameters
 $$f_{\em post}\left(\phi, \alpha, \u, R^2 \given \y, \X = \Q\R, \eta\right).$$
